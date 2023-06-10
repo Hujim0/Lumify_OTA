@@ -1,0 +1,31 @@
+{
+    "elems": [
+        {
+            "name": "Speed",
+            "arg_name": "speed",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=50"
+            ],
+            "desc": "speed at the colors are changing"
+        },
+        {
+            "name": "Count",
+            "arg_name": "count",
+            "input_props": [
+                "type=number",
+                "min=0"
+            ],
+            "desc": "number of rainbows on a strip / put a zero if you want a strip to ligth with one color"
+        },
+        {
+            "name": "Is Revesed",
+            "arg_name": "reversed",
+            "input_props": [
+                "type=checkbox"
+            ],
+            "desc": "check the mark if you want the rainbow go in opposite direction"
+        }
+    ]
+}

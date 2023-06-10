@@ -1,0 +1,149 @@
+.button-holder {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-button {
+    height: 60px;
+    width: 60px;
+    border-radius: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-style: none;
+    background-color: var(--ink-1);
+    transition: background-color 0.2s, transform 0.15s;
+    /* transition: transform 0.5s; */
+}
+
+.add-button:active {
+    transform: scale(0.9);
+    /* background-color: var(--ink-1) !important; */
+}
+
+.add-button:hover {
+    background-color: rgb(42, 44, 46);
+    border: solid 2px var(--ink-1);
+    /* rgb(37, 39, 42); */
+}
+
+.add-button i {
+    font-size: 30px;
+
+    color: var(--text-color);
+
+    transform: translate(1px, 0px);
+}
+
+
+.timelist-element {
+    margin: 1rem;
+    background-color: var(--ink-grey);
+    height: 1.5rem;
+    border-radius: 1rem;
+    display: grid;
+    grid-template-columns: 5fr 1fr 5fr;
+    align-items: start;
+    justify-content: start;
+    padding: 0.5rem;
+    padding-right: 1rem;
+    /* width: flex; */
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.timelist-element>label {
+    grid-column: 1;
+    margin-left: 1rem;
+    font-size: 25px;
+    font-weight: bold;
+}
+
+.timelist-element>div {
+    grid-column: 3;
+    /* columns: 2; */
+    justify-self: end;
+    /* justify-self: flex-start; */
+    margin-left: 2rem;
+    /* margin-bottom: 3px; */
+    height: 3rem;
+    min-height: 3rem;
+}
+
+.timelist-element i {
+    text-align: center;
+    padding-top: 0.25rem;
+    width: 1.5rem;
+    height: 1.25rem;
+    /* margin-bottom: 3px; */
+    border-radius: 100%;
+    color: var(--text-color);
+}
+
+.timelist-element i:hover {
+    background-color: var(--ink-2-grey);
+    transition: all 0.1s;
+}
+
+.full-screen>div {
+    padding-top: 0.5rem;
+    padding-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin-left: 12.5vw;
+    margin-top: 5rem;
+    /* min-height: 50%; */
+    max-width: 75%;
+    border-radius: 50px;
+    border: solid 4px var(--ink-1);
+    background-color: var(--background);
+}
+
+.modes-wrapper {
+    transform: none !important;
+    max-width: 100% !important;
+    min-width: 60% !important;
+}
+
+.list {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+    min-width: 80% !important;
+    max-width: 80% !important;
+    margin-right: 1rem !important;
+}
+
+.cross-holder {
+    position: absolute;
+    top: 21%;
+    right: 15%;
+}
+
+.cross-holder button {
+    height: 2rem;
+    width: 2rem;
+    background-color: transparent;
+    border: none;
+    border-radius: 100%;
+}
+
+.cross-holder button:hover {
+    background-color: var(--ink-2-grey);
+    border: none;
+    transition: all 0.1s;
+}
+
+.cross-holder button:active {
+    transform: scale(0.9);
+    transition: all 0.1s;
+}
+
+.cross-holder button i {
+    position: inherit;
+    color: var(--text-color);
+    font-size: 35px;
+}

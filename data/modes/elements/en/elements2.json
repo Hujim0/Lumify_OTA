@@ -1,0 +1,49 @@
+{
+    "elems": [
+        {
+            "name": "Color",
+            "arg_name": "color",
+            "input_props": [
+                "type=color"
+            ],
+            "desc": "the main color"
+        },
+        {
+            "name": "Speed",
+            "arg_name": "speed",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=50"
+            ],
+            "desc": "speed at the wave are moving"
+        },
+        {
+            "name": "Wave width",
+            "arg_name": "length",
+            "input_props": [
+                "type=number",
+                "min=0"
+            ],
+            "desc": "number of LED's that would be at full brigthness"
+        },
+        {
+            "name": "Intensity",
+            "arg_name": "intensity",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=100"
+            ],
+            "desc": "the strength of LED dimming"
+        },
+        {
+            "name": "Is Revesed",
+            "arg_name": "reversed",
+            "input_props": [
+                "type=checkbox"
+            ],
+            "desc": "check the mark if you want the rainbow go in opposite direction"
+        }
+    ]
+}

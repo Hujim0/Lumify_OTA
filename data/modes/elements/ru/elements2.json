@@ -1,0 +1,49 @@
+{
+    "elems": [
+        {
+            "name": "Цвет",
+            "arg_name": "color",
+            "input_props": [
+                "type=color"
+            ],
+            "desc": "Основной цвет"
+        },
+        {
+            "name": "Скорость",
+            "arg_name": "speed",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=50"
+            ],
+            "desc": "Скорость движения волны"
+        },
+        {
+            "name": "Длинна",
+            "arg_name": "length",
+            "input_props": [
+                "type=number",
+                "min=0"
+            ],
+            "desc": "Количество светодиодов, которые будут загораться максимальной яркостью"
+        },
+        {
+            "name": "Жесткость",
+            "arg_name": "intensity",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=100"
+            ],
+            "desc": "Насколько темная волна"
+        },
+        {
+            "name": "Развернуть",
+            "arg_name": "reversed",
+            "input_props": [
+                "type=checkbox"
+            ],
+            "desc": "Разварачивает направление движения волны"
+        }
+    ]
+}

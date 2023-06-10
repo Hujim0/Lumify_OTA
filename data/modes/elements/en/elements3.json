@@ -1,0 +1,40 @@
+{
+    "elems": [
+        {
+            "name": "Edit points",
+            "arg_name": "edit",
+            "input_props": [
+                "type=checkbox"
+            ],
+            "desc": "check the mark if you want to edit sunset and sunrise points"
+        },
+        {
+            "name": "Sunrise point",
+            "arg_name": "start",
+            "input_props": [
+                "type=number",
+                "min=0"
+            ],
+            "desc": "the point at witch the sun will rise"
+        },
+        {
+            "name": "Sunset point",
+            "arg_name": "end",
+            "input_props": [
+                "type=number",
+                "min=0"
+            ],
+            "desc": "the point at witch the sun will set"
+        },
+        {
+            "name": "Time Scale",
+            "arg_name": "speed",
+            "input_props": [
+                "type=range",
+                "min=0",
+                "max=2",
+                "step=0.1"
+            ]
+        }
+    ]
+}

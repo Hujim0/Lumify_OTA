@@ -1,0 +1,12 @@
+{
+    "elems": [
+        {
+            "name": "Цвет",
+            "arg_name": "color",
+            "input_props": [
+                "type=color"
+            ],
+            "desc": "Один цвет на всю длинну ленты"
+        }
+    ]
+}

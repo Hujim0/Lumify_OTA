@@ -1,0 +1,12 @@
+{
+    "elems": [
+        {
+            "name": "Color",
+            "arg_name": "color",
+            "input_props": [
+                "type=color"
+            ],
+            "desc": "a single color for all of the LED strip"
+        }
+    ]
+}

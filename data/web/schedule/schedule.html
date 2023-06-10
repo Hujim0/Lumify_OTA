@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumify - Schedule</title>
+    <link rel="stylesheet" href="/data/web/styles_global.css" type="text/css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+    <link rel="stylesheet" href="/data/web/side_menu.css" type="text/css" />
+    <link rel="stylesheet" href="/data/web/schedule/schedule.css" type="text/css" />
+    <link rel="stylesheet" href="/data/web/modes_style.css" type="text/css" />
+
+    <script defer src="/data/web/side_menu.js" type="text/javascript"></script>
+    <script defer src="/data/web/modes_list.js" type="text/javascript"></script>
+    <script defer src="/data/web/schedule/schedule.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+    <div id="menu_bars" class="fas fa-bars fa-lg"></div>
+    <div id="navbar">
+        <i id="menu_cross" class="fa-solid fa-xmark"></i>
+        <div>
+            <a href="home">Home</a>
+            <a href="schedule" class="underlined">Scheldule</a>
+            <a href="../changelang?lang=ru">Change to russian</a>
+
+            <!-- <a href="debug">Debug</a> -->
+            <!-- <a href="other">Other</a> -->
+
+            <hr />
+            <a href="https://github.com/Hujim0">Made by hujimo</a>
+            <label>Licence - MIT</label>
+        </div>
+    </div>
+    <h1 class="centered">Schedule</h1>
+    <div class="main-holder">
+        <h1 class="centered">Add your time events!</h1>
+
+        <div class="timelist">
+            <div class="timelist-element">
+                <label>23:00</label>
+                <div>
+                    <label>Type: static</label>
+                    <i class="fa-solid fa-pen"></i>
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </div>
+            </div>
+            <div class="timelist-element">
+
+            </div>
+            <div class="timelist-element">
+
+            </div>
+            <div class="button-holder">
+                <button class="add-button" id="add_button">
+                    <i class="fa-sharp fa-solid fa-plus"></i>
+                </button>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="popup-holder" class="full-screen">
+        <div>
+            <div class="cross-holder">
+                <button class="cross-button">
+                    <i id="popup-cross" class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <h1 class="centered">Choose mode</h1>
+            <div id="mode_list" class="modes-wrapper">
+                <label id="mode-static">
+                    <input type="radio" name="modes-radio" mode-id="0">
+                    <div>Static mode</div>
+                </label>
+                <label id="mode-rainbow">
+                    <input type="radio" name="modes-radio" mode-id="1">
+                    <div>Rainbow mode</div>
+                </label>
+                <label id=" mode-wave">
+                    <input type="radio" name="modes-radio" mode-id="2">
+                    <div>
+                        Wave mode
+                    </div>
+                </label>
+                <label id=" mode-sky">
+                    <input type="radio" name="modes-radio" mode-id="3">
+                    <div>Sky mode</div>
+                </label>
+            </div>
+            <h1 class="centered">Mode settings</h1>
+
+            <template id="skeleton-template">
+                <div>
+                    <div class="skeleton-text list-skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                </div>
+            </template>
+            <template id="list-template">
+                <div>
+                    <label>
+                        Parameter
+                    </label>
+                    <input type="number" />
+                    <label class="info-button">
+                        Info
+                        <input type="checkbox"></input>
+                        <i class="fas fa-circle-info"></i>
+                    </label>
+                    <label class="text-light">
+                    </label>
+                </div>
+            </template>
+
+            <div class="list" id="list-containter">
+                <div>
+                    <div class="skeleton-text list-skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                </div>
+                <div>
+                    <div class="skeleton-text list-skeleton-text"></div>
+                    <div class="skeleton-text"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer></footer>
+</body>

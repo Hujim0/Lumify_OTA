@@ -1,0 +1,189 @@
+.list>div {
+    margin-top: 10px;
+    padding: 10px 10px 0 10px;
+    padding-right: 4vw;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+    padding-left: 10px;
+    border-radius: 15px;
+    grid-template-columns: 1fr 1fr 1.5fr;
+    background-color: var(--ink-grey);
+    transition: all .1s ease-in-out;
+}
+
+.list>div:hover {
+    outline: solid 4px var(--ink-3);
+}
+
+.list>div .info-button {
+    padding-top: 6px;
+    padding-right: 16px;
+    grid-row: 1;
+    justify-self: end;
+    grid-column: 3;
+    text-align: right;
+    overflow: visible;
+    border-radius: 5px;
+
+    align-content: center;
+
+    min-height: 1.5rem;
+    min-width: 3.5rem;
+    background-clip: border-box;
+    transition: all 0.1s ease-in-out;
+}
+
+.list>div .info-button>input {
+    display: none;
+}
+
+.list>div .info-button>input:checked+i {
+    color: var(--nice-red);
+    filter: drop-shadow(4px 4px 8px 0px rgba(0, 0, 0, .2));
+    transition: all 0.1s ease-in-out;
+}
+
+.list>div .info-button:hover {
+    color: var(--ink-0);
+    background-color: var(--ink-5);
+}
+
+.list>div .info-button+label {
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    max-height: 0px;
+    grid-column: 1/4;
+    transition: all .1s linear;
+    overflow: hidden;
+}
+
+.list>div .info-button+label::after {
+    content: "\A  ";
+    white-space: pre;
+}
+
+.list>div .info-button+.active {
+    max-height: 3rem;
+    transition: all .1s linear;
+}
+
+.list>div>input {
+    justify-self: end;
+}
+
+.list>div>input[type="number"] {
+    max-width: 2rem;
+}
+
+.list>div>label:first-child {
+    margin-left: 1rem;
+    overflow-wrap: normal;
+    white-space: nowrap;
+}
+
+.list>div>.list-skeleton-text {
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+    grid-column: 1/3;
+}
+
+.list>div>.skeleton-text:last-child {
+    margin-top: 0.8rem;
+    margin-bottom: 0.8rem;
+    grid-column: 3/3;
+    justify-self: end;
+}
+
+.modes-wrapper {
+    transform: translateX(-3vw);
+    display: flex;
+    overflow-x: scroll;
+    overflow-y: visible;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    min-width: 100vw;
+    flex-wrap: nowrap;
+}
+
+.modes-wrapper::-webkit-scrollbar {
+    /* width: 5px; */
+    height: 6px;
+    border-radius: 3px;
+}
+
+.modes-wrapper::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.modes-wrapper::-webkit-scrollbar-thumb {
+    background-color: var(--ink-grey);
+}
+
+.modes-wrapper>label {
+    display: flex;
+    margin: 10px;
+}
+
+.modes-wrapper>label input[type=radio] {
+    display: none;
+}
+
+.modes-wrapper>label div {
+    display: flex;
+    cursor: pointer;
+    padding: 5px 10px;
+    line-height: 34px;
+    border: 4px solid transparent;
+    border-radius: 8px;
+    user-select: none;
+    min-width: 100px;
+    min-height: 175px;
+    justify-content: center;
+    text-align: center;
+    align-items: end;
+    word-spacing: 100vw;
+    box-shadow: 4px 4px 8px 0px rgba(0, 0, 0, .2);
+    background-color: var(--ink-2);
+    transition: all .1s ease-in-out;
+}
+
+/* Checked */
+.modes-wrapper>label input[type=radio]:checked+div {
+    background: var(--nice-orange);
+    border-color: white;
+}
+
+/* Hover */
+.modes-wrapper>label div:hover {
+    color: var(--ink-0);
+    transform: scale(1.1);
+    border-color: var(--ink-3);
+}
+
+/* Disabled */
+.modes-wrapper>label input[type=radio]:disabled+div {
+    background: #efefef;
+    color: #666;
+}
+
+.svg-waves {
+    position: inherit;
+    /* top: 0; */
+    /* left: 0; */
+    /* width: 100%; */
+    overflow: hidden;
+    line-height: 0;
+}
+
+.svg-waves svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 214px;
+}
+
+.svg-waves .shape-fill {
+    fill: #FFFFFF;
+}
