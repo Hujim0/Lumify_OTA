@@ -1,3 +1,5 @@
+#include <global.h>
+
 #include <TimeManager.h>
 #include <TimeEvent.h>
 
@@ -63,11 +65,16 @@ void TimeManager::UpdateMinuts()
     {
         bool result = timeEvents[i].CheckTime(modeHandler, epoch_time_day_seconds /*, dayOfTheWeek*/);
 
-        Serial.println(result);
+        sprintln(String(result));
 
         if (result)
         {
-            Serial.println(String("--[" + GetFormattedTime() + "]: " + timeEvents[i].stringify()));
+            sprintln(String("--[" + GetFormattedTime() + "]: " + timeEvents[i].stringify()));
+        }
+
+        if (timer != NULL)
+        {
+            timer();
         }
     }
 }
@@ -83,21 +90,17 @@ void TimeManager::UpdateSeconds()
 
     UpdateMinuts();
 
-    // time events (second update)
+    // // time events (second update)
 
-    FiveSecondCounter++;
+    // OneMinuteCounter++;
 
-    if (FiveSecondCounter == 5)
-    {
-        FiveSecondCounter = 0;
+    // if (OneMinuteCounter == 5)
+    // {
+    //     OneMinuteCounter = 0;
 
-        if (timer != NULL)
-        {
-            timer();
-        }
-    }
+    // }
 
-    Serial.println(String(epoch_time_day_seconds) + " " + GetFormattedTime());
+    // sprintln(String(epoch_time_day_seconds) + " " + GetFormattedTime());
 }
 
 String TimeManager::GetFormattedTime()
@@ -126,7 +129,7 @@ void TimeManager::AddTimeEvent(TimeEvent event)
 {
     timeEvents.add(event);
 
-    Serial.println("--Added " + event.stringify());
+    sprintln("--Added " + event.stringify());
 }
 
 void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
@@ -143,7 +146,7 @@ void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
 
     if (delete_index == -1)
     {
-        Serial.println("--Event not found: " + String(epoch_time) + " type: " + String(event_type));
+        sprintln("--Event not found: " + String(epoch_time) + " type: " + String(event_type));
         return;
     }
 

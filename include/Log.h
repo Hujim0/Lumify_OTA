@@ -2,15 +2,29 @@
 #define LOG_H
 
 #include <ArduinoJson.h>
+#include <LittleFS.h>
 
 class Log
 {
 
 public:
-    static bool SaveLogs;
+    bool SaveLogs = true;
+    bool gotTime = false;
 
-    static void Print(const char *);
-    static void Print(String);
+    int currentFileNumber = 0;
+
+    File currentFile;
+
+    // void Print(const char *);
+    void Println(String);
+    String GetFileName(int id);
+    String GetFileName(String id);
+
+    void Begin();
+
+    static Log *Instance;
+
+    Log();
 };
 
 #endif

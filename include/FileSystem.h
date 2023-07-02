@@ -7,9 +7,12 @@
 #include <LittleFS.h>
 #include <ArduinoJson.h>
 
+#define STATIC_DOCUMENT_MEMORY_SIZE 512
+
 void GetWifiSettings(String *);
-String GetPreferences();
+String LoadPreferences();
 void SavePreferences(String);
+void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *);
 String GetModeArgs(int);
 void SaveModeArgs(int, String);
 String GetElements(int);

@@ -40,14 +40,10 @@ void WaveMode::update_args(const char *data)
 
     speed = args[SPEED_ARG].as<float>();
     intensity = args[INTENSITY_ARG].as<float>() * 0.01F;
-    if (args[LENGTH_ARG].as<float>() == 0.0F)
-    {
-        length = 0.0F;
-    }
-    else
-    {
-        length = PI / (args[LENGTH_ARG].as<float>());
-    }
+    length = args[LENGTH_ARG].as<float>();
+
+    if (length != 0.0F)
+        length = PI / length;
 
     reversed = args[REVERSED_ARG].as<bool>();
 

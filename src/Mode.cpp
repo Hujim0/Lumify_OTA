@@ -1,4 +1,5 @@
 #include <Mode.h>
+#include <global.h>
 
 uint32_t Mode::toHex(String hex)
 {
@@ -17,10 +18,5 @@ int Mode::removeNegatives(int num)
 
 void Mode::printCRGB(CRGB color)
 {
-    Serial.print("r: ");
-    Serial.println(color.r);
-    Serial.print("g: ");
-    Serial.println(color.g);
-    Serial.print("b: ");
-    Serial.println(color.b);
+    sprintln("r:" + String(color.r) + ",g:" + String(color.g) + ",b:" + String(color.b));
 }
