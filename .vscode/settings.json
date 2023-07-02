@@ -1,17 +1,18 @@
 {
     "files.associations": {
         "array": "cpp",
+        "*.tcc": "cpp",
+        "list": "cpp",
         "string": "cpp",
         "string_view": "cpp",
         "ranges": "cpp",
+        "cmath": "cpp",
+        "chrono": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
-        "*.tcc": "cpp",
         "bitset": "cpp",
         "cctype": "cpp",
-        "chrono": "cpp",
         "clocale": "cpp",
-        "cmath": "cpp",
         "compare": "cpp",
         "concepts": "cpp",
         "cstdarg": "cpp",
@@ -24,7 +25,6 @@
         "cwchar": "cpp",
         "cwctype": "cpp",
         "deque": "cpp",
-        "list": "cpp",
         "map": "cpp",
         "set": "cpp",
         "unordered_map": "cpp",
@@ -56,5 +56,6 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp"
-    }
+    },
+    "cmake.configureOnOpen": true
 }

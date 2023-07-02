@@ -6,7 +6,7 @@
 #include <TimeEvent.h>
 #include <ESP_LinkedList.h>
 
-typedef std::function<void()> OneMinuteTimer;
+typedef std::function<void()> FiveSecondTimer;
 
 class TimeManager
 {
@@ -19,7 +19,7 @@ private:
     ESP_LinkedList<TimeEvent> timeEvents;
     int timeEventsCounter = 0;
 
-    // int OneMinuteCounter = 0;
+    int FiveSecondCounter = 0;
     bool isSetuped = false;
 
     int _seconds;
@@ -34,7 +34,7 @@ public:
     void Update();
     String GetFormattedTime();
 
-    OneMinuteTimer timer;
+    FiveSecondTimer timer;
 
     void AddTimeEvent(TimeEvent handler);
     void RemoveTimeEvent(int epoch_time, int event_type);

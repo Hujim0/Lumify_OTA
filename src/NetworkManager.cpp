@@ -1,7 +1,4 @@
-#include <global.h>
-
 #include <NetworkManager.h>
-#include <AsyncElegantOTA.h>
 
 const IPAddress ip(192, 168, 0, 146); // статический IP
 const IPAddress gateway(192, 168, 0, 146);
@@ -16,7 +13,10 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
     switch (type)
     {
     case WS_EVT_CONNECT:
-        sprintln("websocket client #" + String(client->id()) + " connected from " + client->remoteIP().toString());
+        Serial.print("websocket client #");
+        Serial.print(client->id());
+        Serial.print(" connected from ");
+        Serial.println(client->remoteIP().toString().c_str());
 
         if (NetworkManager::Instance->onNewMessageHandler != NULL)
         {
@@ -25,7 +25,9 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
 
         break;
     case WS_EVT_DISCONNECT:
-        sprintln("websocket client #" + String(client->id()) + " disconnected");
+        Serial.print("websocket client #");
+        Serial.print(client->id());
+        Serial.print(" disconnected");
         NetworkManager::Instance->CleanUp();
         break;
     case WS_EVT_DATA:
@@ -47,7 +49,9 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
 
     if (info->len == len)
     {
-        sprintln("[Websocket] Got: \"" + String((char *)data) + "\" --endln");
+        Serial.print("[Websocket] Got: \"");
+        Serial.print((char *)data);
+        Serial.println("\" --endln");
 
         if (onNewClientHandler != NULL)
         {
@@ -59,11 +63,19 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
     buffer_size += len;
     buffer += (char *)data;
 
-    sprintln("[Websocket] Partial message: " + String(buffer_size) + " / " + String(info->len) + " \"" + String((char *)data) + "\" --endln");
+    Serial.print("[Websocket] Partial message: ");
+    Serial.print(buffer_size);
+    Serial.print(" / ");
+    Serial.print(info->len);
+    Serial.print(" \"");
+    Serial.print((char *)data);
+    Serial.println("\" --endln");
 
     if (info->len == buffer_size)
     {
-        sprintln("[Websocket] Got: \"" + String(buffer) + "\" --endln");
+        Serial.print("[Websocket] Got: \"");
+        Serial.print(buffer);
+        Serial.println("\" --endln");
 
         buffer_size = (uint64_t)0;
 
@@ -81,7 +93,8 @@ void NetworkManager::SentTextToClient(int id, const char *data)
 }
 void NetworkManager::SentTextToAll(const char *data)
 {
-    sprintln("Texted to all: " + String(data));
+    Serial.print("Texted to all: ");
+    Serial.println(data);
     webSocket.textAll(data);
 }
 
@@ -95,22 +108,25 @@ bool NetworkManager::Begin(const char *ssid, const char *password)
     WiFi.setAutoReconnect(true);
 
 #ifdef DEBUG_WIFI_SETTINGS
-    sprintln("Wifi: " + String(ssid) + String(password));
+    Serial.println("Wifi config:");
+    Serial.println("ssid: " + String(ssid));
+    Serial.println("pass: " + String(password));
     Serial.println("------------------------------------------------------------------");
 #endif
 
-    sprintln("[ESP] Connecting to " + String(ssid) + "...");
+    Serial.print("[ESP] Connecting to ");
+    Serial.print(ssid);
+    Serial.print("...");
 
     if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
     {
         return false;
     }
 
-    sprintln("success");
+    Serial.println("success");
     // server setup
 
     server.begin();
-    AsyncElegantOTA.begin(&server, "admin", "admin");
 
     // websocket setup
     server.addHandler(&webSocket);
@@ -119,8 +135,8 @@ bool NetworkManager::Begin(const char *ssid, const char *password)
     // print server url
     url = "http://" + WiFi.localIP().toString() + ":" + String(PORT);
 
-    sprintln("[ESP] HTTP server started at \"" + url + "\"");
-    sprintln("------------------------------------------------------------------");
+    Serial.println("[ESP] HTTP server started at \"" + url + "\"");
+    Serial.println("------------------------------------------------------------------");
 
     return true;
 }
@@ -176,9 +192,4 @@ void NetworkManager::ServeStatic(const char *uri, fs::FS &fs, const char *path, 
 String NetworkManager::getUrl()
 {
     return url;
-}
-
-void NetworkManager::TryReconnect()
-{
-    WiFi.reconnect();
 }

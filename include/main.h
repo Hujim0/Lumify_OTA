@@ -7,15 +7,13 @@
 #define STRIP_PIN D4
 #define COLOR_ORDER GRB
 
-void AddServerHandlers();
-// void OnClientConnected(int);
+void OnClientConnected(int);
 void OnWebSocketMessage(String);
-void ApplyPreferences(String);
+void LoadFromPreferences(String);
 void ChangeLanguage(String);
-void SetupFastLED();
+void ledSetup();
 void fiveSecondTimer();
-void ConnectToWifi();
+void networkSetup();
 void LoadTimeEvents();
-void TryReconnect();
 
 #endif

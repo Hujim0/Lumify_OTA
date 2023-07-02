@@ -37,7 +37,6 @@ public:
     void OnNewMessage(OnNewMessageHandler);
     void OnNewClient(OnNewClientHandler);
     void OnConnectionLost(OnConnectionLostHandler);
-    void TryReconnect();
     void SentTextToClient(int, const char *);
     void SentTextToAll(const char *);
     void CleanUp();

@@ -4,7 +4,6 @@
 #include <FastLED.h>
 #include <main.h>
 #include <ArduinoJson.h>
-#include <FileSystem.h>
 
 #define SPEED_ARG "speed"
 #define INTENSITY_ARG "intensity"
@@ -15,6 +14,9 @@
 #define START_ARG "start"
 #define END_ARG "end"
 #define COLOR_ARG "color"
+
+#define STATIC_DOCUMENT_MEMORY_SIZE 512
+
 class Mode
 {
 public:

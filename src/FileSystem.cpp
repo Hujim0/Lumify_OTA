@@ -24,16 +24,8 @@ void SavePreferences(String preferences_json)
     file.write(preferences_json.c_str());
     file.close();
 }
-void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preferences_json)
-{
-    String json_save;
-    serializeJson(*preferences_json, json_save);
-    SavePreferences(json_save);
 
-    preferences_json->garbageCollect();
-}
-
-String LoadPreferences()
+String GetPreferences()
 {
     File file = LittleFS.open(PREFRENCES_PATH, "r");
     String data = file.readString();
@@ -46,7 +38,10 @@ String GetModeArgs(int id)
     String path = "/modes/mode" + String(id) + ".json";
 
     if (!LittleFS.exists(path))
+    {
+        throw std::invalid_argument("File not found");
         return "";
+    }
 
     File file = LittleFS.open(path, "r");
     String data = file.readString();
