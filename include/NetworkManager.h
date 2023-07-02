@@ -1,10 +1,12 @@
 #ifndef NETWORKMANAGER_H
-#define NETWROKMANAGER_H
+#define NETWORKMANAGER_H
 
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESPAsyncWebServer.h>
-#include <ESPAsyncTCP.h>
+#include <Arduino.h>
+// #include <ESP8266WiFi.h>
+// #include <WiFiClient.h>
+#include <ESPAsync_WiFiManager.hpp>
+// #include <ESPAsyncWebServer.h>
+// #include <ESPAsyncTCP.h>
 
 #define PORT 10200
 
@@ -30,9 +32,9 @@ private:
 public:
     void handleWebSocketMessage(void *, uint8_t *, size_t);
 
-    OnNewMessageHandler onNewMessageHandler;
-    OnNewClientHandler onNewClientHandler;
-    OnConnectionLostHandler onConnectionLostHandler;
+    OnNewMessageHandler onNewMessageHandler = nullptr;
+    OnNewClientHandler onNewClientHandler = nullptr;
+    OnConnectionLostHandler onConnectionLostHandler = nullptr;
 
     void OnNewMessage(OnNewMessageHandler);
     void OnNewClient(OnNewClientHandler);

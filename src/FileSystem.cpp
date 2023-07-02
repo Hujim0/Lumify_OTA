@@ -26,9 +26,10 @@ void SavePreferences(String preferences_json)
 }
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preferences_json)
 {
-    String json_save;
-    serializeJson(*preferences_json, json_save);
-    SavePreferences(json_save);
+    File file = LittleFS.open(PREFRENCES_PATH, "w");
+    serializeJson(*preferences_json, file);
+
+    file.close();
 
     preferences_json->garbageCollect();
 }

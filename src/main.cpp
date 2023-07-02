@@ -16,6 +16,7 @@
 #include <main.h>
 #include <ModeHandler.h>
 #include <NetworkManager.h>
+// #include <ESPAsync_WiFiManager.h>
 #include <FileSystem.h>
 #include <TimeManager.h>
 
@@ -127,7 +128,7 @@ void AddServerHandlers()
         deserializeJson(preferences, LoadPreferences());
         preferences["mode"] = id;
         SavePreferences(&preferences);
-    } 
+    }
 
     request->send(
         request->beginResponse(HTTP_POST, "text/json", args)); });
@@ -231,6 +232,8 @@ void OnWebSocketMessage(String data)
 
   if (data[0] != '{')
     return;
+
+  sprintln("[Websocket] Got: \"" + data + "\" --endln");
 
   StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> doc;
   deserializeJson(doc, data.c_str());

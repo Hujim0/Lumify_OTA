@@ -1,7 +1,7 @@
 #include <global.h>
 
 #include <NetworkManager.h>
-#include <AsyncElegantOTA.h>
+// #include <AsyncElegantOTA.h>
 
 const IPAddress ip(192, 168, 0, 146); // статический IP
 const IPAddress gateway(192, 168, 0, 146);
@@ -16,16 +16,14 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
     switch (type)
     {
     case WS_EVT_CONNECT:
-        sprintln("websocket client #" + String(client->id()) + " connected from " + client->remoteIP().toString());
+        sprintln("[Websocket] client #" + String(client->id()) + " connected from " + client->remoteIP().toString());
 
-        if (NetworkManager::Instance->onNewMessageHandler != NULL)
-        {
+        if (NetworkManager::Instance->onNewClientHandler != NULL)
             NetworkManager::Instance->onNewClientHandler(client->id());
-        }
 
         break;
     case WS_EVT_DISCONNECT:
-        sprintln("websocket client #" + String(client->id()) + " disconnected");
+        sprintln("[Websocket] client #" + String(client->id()) + " disconnected");
         NetworkManager::Instance->CleanUp();
         break;
     case WS_EVT_DATA:
@@ -47,12 +45,9 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
 
     if (info->len == len)
     {
-        sprintln("[Websocket] Got: \"" + String((char *)data) + "\" --endln");
-
-        if (onNewClientHandler != NULL)
-        {
+        if (onNewMessageHandler != NULL)
             onNewMessageHandler((String)(char *)data);
-        }
+
         return;
     }
 
@@ -63,14 +58,12 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
 
     if (info->len == buffer_size)
     {
-        sprintln("[Websocket] Got: \"" + String(buffer) + "\" --endln");
 
         buffer_size = (uint64_t)0;
 
-        if (onNewClientHandler != NULL)
-        {
+        if (onNewMessageHandler != NULL)
             onNewMessageHandler(buffer);
-        }
+
         buffer = "";
     }
 }
@@ -83,46 +76,6 @@ void NetworkManager::SentTextToAll(const char *data)
 {
     sprintln("Texted to all: " + String(data));
     webSocket.textAll(data);
-}
-
-bool NetworkManager::Begin(const char *ssid, const char *password)
-{
-    Instance = this;
-
-    // connection to wifi
-    // WiFi.config(ip, gateway, subnet);
-    WiFi.begin(ssid, password);
-    WiFi.setAutoReconnect(true);
-
-#ifdef DEBUG_WIFI_SETTINGS
-    sprintln("Wifi: " + String(ssid) + String(password));
-    Serial.println("------------------------------------------------------------------");
-#endif
-
-    sprintln("[ESP] Connecting to " + String(ssid) + "...");
-
-    if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
-    {
-        return false;
-    }
-
-    sprintln("success");
-    // server setup
-
-    server.begin();
-    AsyncElegantOTA.begin(&server, "admin", "admin");
-
-    // websocket setup
-    server.addHandler(&webSocket);
-    webSocket.onEvent(onNewEvent);
-    webSocket.closeAll();
-    // print server url
-    url = "http://" + WiFi.localIP().toString() + ":" + String(PORT);
-
-    sprintln("[ESP] HTTP server started at \"" + url + "\"");
-    sprintln("------------------------------------------------------------------");
-
-    return true;
 }
 
 void NetworkManager::AddWebPageHandler(String uri, ArRequestHandlerFunction func)
@@ -181,4 +134,44 @@ String NetworkManager::getUrl()
 void NetworkManager::TryReconnect()
 {
     WiFi.reconnect();
+}
+
+bool NetworkManager::Begin(const char *ssid, const char *password)
+{
+    Instance = this;
+
+    // connection to wifi
+    // WiFi.config(ip, gateway, subnet);
+    WiFi.begin(ssid, password);
+    WiFi.setAutoReconnect(true);
+
+#ifdef DEBUG_WIFI_SETTINGS
+    sprintln("Wifi: " + String(ssid) + String(password));
+    Serial.println("------------------------------------------------------------------");
+#endif
+
+    sprintln("[ESP] Connecting to " + String(ssid) + "...");
+
+    if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
+    {
+        return false;
+    }
+
+    sprintln("success");
+    // server setup
+
+    server.begin();
+    // AsyncElegantOTA.begin(&server, "admin", "admin");
+
+    // websocket setup
+    server.addHandler(&webSocket);
+    webSocket.onEvent(onNewEvent);
+    webSocket.closeAll();
+    // print server url
+    url = "http://" + WiFi.localIP().toString() + ":" + String(PORT);
+
+    sprintln("[ESP] HTTP server started at \"" + url + "\"");
+    sprintln("------------------------------------------------------------------");
+
+    return true;
 }
