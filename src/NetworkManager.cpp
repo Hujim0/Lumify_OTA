@@ -1,9 +1,11 @@
 #include <global.h>
 
 #include <NetworkManager.h>
-// #include <AsyncElegantOTA.h>
 
-const IPAddress ip(192, 168, 0, 146); // статический IP
+#include <AsyncElegantOTA.h>
+#include <ESPAsync_WiFiManager.h>
+
+const IPAddress ip(192, 168, 0, 146);
 const IPAddress gateway(192, 168, 0, 146);
 const IPAddress subnet(255, 255, 255, 0);
 
@@ -37,35 +39,36 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
 // websocket stuff
 void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len)
 {
+    if (onNewMessageHandler == NULL)
+        return;
+
     AwsFrameInfo *info = (AwsFrameInfo *)arg;
     if (info->opcode != WS_TEXT)
         return;
 
     data[len] = 0;
 
-    if (info->len == len)
+    if (info->len != len)
     {
-        if (onNewMessageHandler != NULL)
-            onNewMessageHandler((String)(char *)data);
+        buffer_size += len;
+        buffer += (char *)data;
+
+        sprintln("[Websocket] Partial message: " + String(buffer_size) + " / " + String(info->len) + " \"" + String((char *)data) + "\" --endln");
+
+        if (info->len != buffer_size)
+            return;
+
+        onNewMessageHandler(buffer);
+
+        buffer_size = (uint64_t)0;
+        buffer = "";
 
         return;
     }
 
-    buffer_size += len;
-    buffer += (char *)data;
+    onNewMessageHandler((String)(char *)data);
 
-    sprintln("[Websocket] Partial message: " + String(buffer_size) + " / " + String(info->len) + " \"" + String((char *)data) + "\" --endln");
-
-    if (info->len == buffer_size)
-    {
-
-        buffer_size = (uint64_t)0;
-
-        if (onNewMessageHandler != NULL)
-            onNewMessageHandler(buffer);
-
-        buffer = "";
-    }
+    return;
 }
 
 void NetworkManager::SentTextToClient(int id, const char *data)
@@ -135,22 +138,25 @@ void NetworkManager::TryReconnect()
 {
     WiFi.reconnect();
 }
-
-bool NetworkManager::Begin(const char *ssid, const char *password)
+bool NetworkManager::Begin(const char *ssid, const char *pw)
 {
     Instance = this;
 
-    // connection to wifi
-    // WiFi.config(ip, gateway, subnet);
-    WiFi.begin(ssid, password);
+    stringPort = ":" + String(PORT);
+
+    if (PORT == 80)
+        stringPort = "";
+
+    WiFi.begin(ssid, pw);
+    WiFi.mode(WiFiMode_t::WIFI_STA);
     WiFi.setAutoReconnect(true);
 
 #ifdef DEBUG_WIFI_SETTINGS
-    sprintln("Wifi: " + String(ssid) + String(password));
-    Serial.println("------------------------------------------------------------------");
+    sprintln("Wifi: " + String(ssid) + " " + String(pw));
+    sprintln(line);
 #endif
 
-    sprintln("[ESP] Connecting to " + String(ssid) + "...");
+    sprintln("[ESP] Connecting...");
 
     if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
     {
@@ -161,17 +167,38 @@ bool NetworkManager::Begin(const char *ssid, const char *password)
     // server setup
 
     server.begin();
-    // AsyncElegantOTA.begin(&server, "admin", "admin");
+    AsyncElegantOTA.begin(&server, "admin", "admin");
 
     // websocket setup
+
     server.addHandler(&webSocket);
     webSocket.onEvent(onNewEvent);
     webSocket.closeAll();
     // print server url
-    url = "http://" + WiFi.localIP().toString() + ":" + String(PORT);
+    WiFi.config(ip, gateway, subnet);
+    url = "http://" + WiFi.localIP().toString() + stringPort;
 
     sprintln("[ESP] HTTP server started at \"" + url + "\"");
-    sprintln("------------------------------------------------------------------");
+
+    if (!MDNS.begin(DNS_SERVER_URL))
+    {
+        sprintln("Error setting up MDNS responder!");
+        return false;
+    }
+
+    sprintln("[ESP] mDNS responder started: \"http://" + String(DNS_SERVER_URL) + ".local" + stringPort + "\"");
+    MDNS.addService("http", "tcp", PORT);
+
+    sprintln(line);
+
+    // ESPAsync_WiFiManager wifiManager(&server, &dnsServer, DNS_SERVER_URL);
+    // wifiManager.setMinimumSignalQuality(-1);
+    // wifiManager.setSTAStaticIPConfig(stationIP, gatewayIP, netMask, dns1IP, dns2IP);
 
     return true;
+}
+
+void NetworkManager::loop()
+{
+    MDNS.update();
 }

@@ -1,14 +1,20 @@
 #ifndef NETWORKMANAGER_H
 #define NETWORKMANAGER_H
 
-#include <Arduino.h>
-// #include <ESP8266WiFi.h>
-// #include <WiFiClient.h>
-#include <ESPAsync_WiFiManager.hpp>
-// #include <ESPAsyncWebServer.h>
-// #include <ESPAsyncTCP.h>
+#define DNS_SERVER_URL "lumify"
+#include <ESP8266mDNS.h>
 
-#define PORT 10200
+#pragma once
+
+#include <NetworkDefines.h>
+#include <Arduino.h>
+#include <ESPAsync_WiFiManager.hpp>
+
+#include <ESP8266WiFi.h>
+#include <ESPAsyncDNSServer.h>
+#include <ESP8266WiFiMulti.h>
+
+#define PORT 80
 
 #define ATTEMPT_DURATION 30000
 
@@ -23,11 +29,22 @@ class NetworkManager
 private:
     AsyncWebServer server = AsyncWebServer(PORT);
     AsyncWebSocket webSocket = AsyncWebSocket("/ws");
+    AsyncDNSServer dnsServer;
+
+    ESP8266WiFiMulti wifiMulti;
 
     String buffer;
     uint64_t buffer_size;
 
     String url;
+    String stringPort;
+
+    // IPAddress stationIP = IPAddress(0, 0, 0, 0);
+    // IPAddress gatewayIP = IPAddress(192, 168, 2, 1);
+    // IPAddress netMask = IPAddress(255, 255, 255, 0);
+
+    // IPAddress dns1IP = gatewayIP;
+    // IPAddress dns2IP = IPAddress(8, 8, 8, 8);
 
 public:
     void handleWebSocketMessage(void *, uint8_t *, size_t);
@@ -54,6 +71,7 @@ public:
     String getUrl();
 
     bool Begin(const char *, const char *);
+    void loop();
 };
 
 #endif

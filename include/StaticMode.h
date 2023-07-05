@@ -7,6 +7,7 @@ class StaticMode : public Mode
 {
 private:
     CRGB color;
+    // StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> args;
 
 public:
     void update(CRGB *);

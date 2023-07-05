@@ -287,6 +287,7 @@ function SetUpInputChild(input_element, _element) {
 
             console.log(event.target.value);
             websocket.send(event.target.value);
+            
         });
 
         input_element.addEventListener("change", EndStream);

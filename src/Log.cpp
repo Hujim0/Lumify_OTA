@@ -29,11 +29,7 @@ void Log::Begin()
     while (LittleFS.exists(GetFileName(currentFileNumber)))
         currentFileNumber += 1;
 
-    // currentFile = LittleFS.open(GetFileName(currentFileNumber), "w");
-
-    sprintln("Log File: " + String(currentFile.fullName()));
-
-    // currentFile.close();
+    sprintln("Log File: " + GetFileName(currentFileNumber));
 }
 
 Log::Log()

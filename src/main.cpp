@@ -72,6 +72,8 @@ void loop()
   FastLED.show();
 
   timeManager.Update();
+
+  network.loop();
 }
 
 void ConnectToWifi()
@@ -304,7 +306,7 @@ void ApplyPreferences(String data)
   sprintln(" settings: ");
   sprintln(data);
 
-  sprintln("------------------------------------------------------------------");
+  sprintln(line);
 
 #endif
 
