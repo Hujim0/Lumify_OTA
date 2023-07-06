@@ -1,5 +1,5 @@
 #include <TimeEvent.h>
-#include <ModeHandler.h>
+#include <TimeManager.h>
 
 bool TimeEvent::CheckTime(ModeHandler *modeHandler, int epoch_time /*, int _dayOfTheWeek*/)
 {
@@ -37,7 +37,7 @@ TimeEvent::TimeEvent() {}
 
 String TimeEvent::stringify()
 {
-    return "TimeEvent at " + String(epochTime) + ", type: " + String(eventType) + " value: " + String(value);
+    return "TimeEvent at " + TimeManager::FormatTime(epochTime) + ", type: " + String(eventType) + ", value: " + String(value);
 }
 
 bool TimeEvent::Equals(int epoch_time, int event_type)

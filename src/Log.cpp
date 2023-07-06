@@ -6,30 +6,37 @@ Log *Log::Instance = 0;
 
 void Log::Println(String msg)
 {
+#ifdef DEBUG_SERIAL
     Serial.println(msg);
-
+#endif
+#ifdef DEBUG_FILE
     if (!SaveLogs)
         return;
 
     currentFile = LittleFS.open(GetFileName(currentFileNumber), "a");
     if (gotTime)
-        msg = "[" + TimeManager::Instance->GetFormattedTime() + "] " + msg;
+        msg = "[" + TimeManager::Instance->GetCurrentFormattedTime() + "] " + msg;
 
     currentFile.println(msg);
     currentFile.close();
+
+#endif
 }
 
 void Log::Begin()
 {
+#ifdef DEBUG_SERIAL
     Serial.println("[ESP] Serial begin");
-
+#endif
+#ifdef DEBUG_FILE
     if (!SaveLogs)
         return;
 
     while (LittleFS.exists(GetFileName(currentFileNumber)))
         currentFileNumber += 1;
 
-    sprintln("Log File: " + GetFileName(currentFileNumber));
+    sprintln("[DEBUG] Log File: " + GetFileName(currentFileNumber));
+#endif
 }
 
 Log::Log()

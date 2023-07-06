@@ -22,17 +22,18 @@ private:
     // int OneMinuteCounter = 0;
     bool isSetuped = false;
 
-    int _seconds;
+    int seconds;
     void UpdateSeconds();
-    int _minuts;
+    int minuts;
     void UpdateMinuts();
-    int _hours;
+    int hours;
     void UpdateHours();
 
 public:
     void Setup(ModeHandler *, int epoch_time_day_seconds, int dayOfTheWeek);
     void Update();
-    String GetFormattedTime();
+    String GetCurrentFormattedTime();
+    static String FormatTime(int);
 
     OneMinuteTimer timer;
 

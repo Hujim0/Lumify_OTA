@@ -3,6 +3,8 @@
 #include <TimeManager.h>
 #include <TimeEvent.h>
 
+const String LOG_PREFIX = "[TimeManager] ";
+
 TimeManager *TimeManager::Instance = 0;
 
 void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOfTheWeek)
@@ -18,9 +20,9 @@ void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOf
 
     MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
 
-    _hours = (epoch_time_seconds / 3600);
-    _minuts = (epoch_time_seconds % 3600) / 60;
-    _seconds = epoch_time_seconds % 60;
+    hours = (epoch_time_seconds / 3600);
+    minuts = (epoch_time_seconds % 3600) / 60;
+    seconds = epoch_time_seconds % 60;
 
     isSetuped = true;
 }
@@ -39,10 +41,10 @@ void TimeManager::UpdateHours()
 {
     int timeHours = (epoch_time_day_seconds / 3600);
 
-    if (_hours == timeHours)
+    if (hours == timeHours)
         return;
 
-    _hours = timeHours;
+    hours = timeHours;
 
     // time events (hour update)
     // probably unnecessary
@@ -52,10 +54,10 @@ void TimeManager::UpdateMinuts()
 {
     int timeMins = (epoch_time_day_seconds % 3600) / 60;
 
-    if (_minuts == timeMins)
+    if (minuts == timeMins)
         return;
 
-    _minuts = timeMins;
+    minuts = timeMins;
 
     UpdateHours();
 
@@ -65,17 +67,15 @@ void TimeManager::UpdateMinuts()
     {
         bool result = timeEvents[i].CheckTime(modeHandler, epoch_time_day_seconds /*, dayOfTheWeek*/);
 
-        sprintln(String(result));
+        if (!result)
+            continue;
 
-        if (result)
-        {
-            sprintln(String("--[" + GetFormattedTime() + "]: " + timeEvents[i].stringify()));
-        }
+        sprintln(LOG_PREFIX + "TimeEvent executed: " + timeEvents[i].stringify());
+    }
 
-        if (timer != NULL)
-        {
-            timer();
-        }
+    if (timer != NULL)
+    {
+        timer();
     }
 }
 
@@ -83,10 +83,10 @@ void TimeManager::UpdateSeconds()
 {
     int timeSecs = epoch_time_day_seconds % 60;
 
-    if (timeSecs == _seconds)
+    if (timeSecs == seconds)
         return;
 
-    _seconds = timeSecs;
+    seconds = timeSecs;
 
     UpdateMinuts();
 
@@ -100,13 +100,34 @@ void TimeManager::UpdateSeconds()
 
     // }
 
-    // sprintln(String(epoch_time_day_seconds) + " " + GetFormattedTime());
+    // sprintln(String(epoch_time_day_seconds) + " " + GetCurrentFormattedTime());
 }
 
-String TimeManager::GetFormattedTime()
+String TimeManager::GetCurrentFormattedTime()
 {
     if (!isSetuped)
         return "unknown";
+
+    String time = "";
+
+    if (hours < 10)
+        time += "0";
+    time += String(hours) + ":";
+    if (minuts < 10)
+        time += "0";
+    time += String(minuts) + ":";
+    if (seconds < 10)
+        time += "0";
+    time += String(seconds);
+
+    return time;
+}
+
+String TimeManager::FormatTime(int epoch)
+{
+    int _hours = epoch / 3600;
+    int _minuts = (epoch % 3600) / 60;
+    int _seconds = epoch % 60;
 
     String time = "";
 
@@ -129,7 +150,7 @@ void TimeManager::AddTimeEvent(TimeEvent event)
 {
     timeEvents.add(event);
 
-    sprintln("--Added " + event.stringify());
+    sprintln(LOG_PREFIX + "Added " + event.stringify());
 }
 
 void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
@@ -146,7 +167,7 @@ void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
 
     if (delete_index == -1)
     {
-        sprintln("--Event not found: " + String(epoch_time) + " type: " + String(event_type));
+        sprintln(LOG_PREFIX + "Delete error: timeEvent not found at " + FormatTime(epoch_time) + ", type: " + String(event_type));
         return;
     }
 

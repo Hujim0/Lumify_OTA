@@ -4,6 +4,15 @@
 #include <ArduinoJson.h>
 #include <LittleFS.h>
 
+#define DEBUG
+
+#ifdef DEBUG
+
+#define DEBUG_FILE
+#define DEBUG_SERIAL
+
+#endif
+
 class Log
 {
 

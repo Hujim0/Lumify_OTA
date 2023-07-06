@@ -9,6 +9,8 @@ const IPAddress ip(192, 168, 0, 146);
 const IPAddress gateway(192, 168, 0, 146);
 const IPAddress subnet(255, 255, 255, 0);
 
+const String LOG_PREFIX = "[Network] ";
+
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
 
@@ -77,7 +79,7 @@ void NetworkManager::SentTextToClient(int id, const char *data)
 }
 void NetworkManager::SentTextToAll(const char *data)
 {
-    sprintln("Texted to all: " + String(data));
+    sprintln("[Websocket] Texted to all: " + String(data));
     webSocket.textAll(data);
 }
 
@@ -140,6 +142,8 @@ void NetworkManager::TryReconnect()
 }
 bool NetworkManager::Begin(const char *ssid, const char *pw)
 {
+    dnsServer.start(PORT, DNS_SERVER_URL, ip);
+
     Instance = this;
 
     stringPort = ":" + String(PORT);
@@ -152,18 +156,18 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
     WiFi.setAutoReconnect(true);
 
 #ifdef DEBUG_WIFI_SETTINGS
-    sprintln("Wifi: " + String(ssid) + " " + String(pw));
+    sprintln(LOG_PREFIX + "Wifi credentials: " + String(ssid) + " " + String(pw));
     sprintln(line);
 #endif
 
-    sprintln("[ESP] Connecting...");
+    sprintln(LOG_PREFIX + "Connecting to Wifi...");
 
     if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
     {
         return false;
     }
 
-    sprintln("success");
+    sprintln(LOG_PREFIX + "success");
     // server setup
 
     server.begin();
@@ -178,15 +182,15 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
     WiFi.config(ip, gateway, subnet);
     url = "http://" + WiFi.localIP().toString() + stringPort;
 
-    sprintln("[ESP] HTTP server started at \"" + url + "\"");
+    sprintln(LOG_PREFIX + "HTTP server started at \"" + url + "\"");
 
     if (!MDNS.begin(DNS_SERVER_URL))
     {
-        sprintln("Error setting up MDNS responder!");
+        sprintln(LOG_PREFIX + "Error setting up MDNS responder!");
         return false;
     }
 
-    sprintln("[ESP] mDNS responder started: \"http://" + String(DNS_SERVER_URL) + ".local" + stringPort + "\"");
+    sprintln(LOG_PREFIX + "mDNS responder started: \"http://" + String(DNS_SERVER_URL) + ".local" + stringPort + "\"");
     MDNS.addService("http", "tcp", PORT);
 
     sprintln(line);
