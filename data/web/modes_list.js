@@ -270,3 +270,78 @@ function SetUpInputChild(input_element, _element) {
 
     return input_element;
 }
+
+class listElement {
+    // <label>Parameter</label>
+    // <input type="number" />
+    // <label class="info-button">
+    //     Info
+    //     <input type="checkbox"></input>
+    //     <i class="fas fa-circle-info"></i>
+    // </label>
+    // <label class="text-light">Description</label>
+
+    constructor(
+        div,
+        setting_name,
+        setting_description,
+        input_name,
+        input_type,
+        input_props,
+        info_inputs_array
+    ) {
+        this.div = div;
+        this.setting_name = setting_name;
+
+        this.div.children[0].innerText = this.setting_name;
+        this.setting_description = setting_description;
+
+        this.info_button_label = this.div.children[2];
+
+        //description---------------------------------
+        if (
+            this.setting_description == null ||
+            this.setting_description == ""
+        ) {
+            this.info_button_label.hidden = true;
+        } else {
+            this.info_button_label.children[0]["arg_id"] =
+                info_inputs_array.length;
+            this.info_button_label.children[0].addEventListener(
+                "input",
+                (event) => {
+                    info_inputs_array[event.target["arg_id"]].classList.toggle(
+                        "active"
+                    );
+                }
+            );
+
+            info_inputs_array.push(this.div.children[3]);
+            //description label
+            this.div.children[3].innerText = _elements[i].desc;
+        }
+        //input-----------------------------------------
+
+        this.input_props = input_props;
+        this.input_name = input_name;
+        this.input_type = input_type;
+        this.input_element = this.div.children[1];
+
+        for (var i = 0; i < this.input_props.length; i++) {
+            var attribute = this.input_props[i].split("=");
+
+            this.input_element[attribute[0]] = attribute[1];
+        }
+
+        this.input_element.mode_arg_name = this.input_name;
+
+        var input_type_getter = "value";
+        if (this.input_type == "checkbox") {
+            input_type_getter = "checked";
+        }
+
+        this.input_element.input_type_getter = input_type_getter;
+
+        return this.div;
+    }
+}

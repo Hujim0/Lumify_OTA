@@ -73,62 +73,137 @@
                     <i id="popup-cross" class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <h1 class="centered">Choose mode</h1>
-            <div id="mode_list" class="modes-wrapper">
-                <label id="mode-static">
-                    <input type="radio" name="modes-radio" mode-id="0">
-                    <div>Static mode</div>
-                </label>
-                <label id="mode-rainbow">
-                    <input type="radio" name="modes-radio" mode-id="1">
-                    <div>Rainbow mode</div>
-                </label>
-                <label id=" mode-wave">
-                    <input type="radio" name="modes-radio" mode-id="2">
+            <div id="settings-holder">
+                <h1 class="centered">Settings</h1>
+                <div class="list">
                     <div>
-                        Wave mode
+                        <label>
+                            Time
+                        </label>
+                        <input type="time" />
+                        <label class="info-button">
+                            Info
+                            <input type="checkbox"></input>
+                            <i class="fas fa-circle-info"></i>
+                        </label>
+                        <label class="text-light">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis, vel.
+                        </label>
                     </div>
-                </label>
-                <label id=" mode-sky">
-                    <input type="radio" name="modes-radio" mode-id="3">
-                    <div>Sky mode</div>
-                </label>
+                    <div>
+                        <label>
+                            Transition
+                        </label>
+                        <input type="range" />
+                        <label class="info-button">
+                            Info
+                            <input type="checkbox"></input>
+                            <i class="fas fa-circle-info"></i>
+                        </label>
+                        <label class="text-light">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis, vel.
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            Type
+                        </label>
+                        <select>
+                            <option>Mode change</option>
+                            <option>Brightness</option>
+                        </select>
+                        <label class="info-button">
+                            Info
+                            <input type="checkbox"></input>
+                            <i class="fas fa-circle-info"></i>
+                        </label>
+                        <label class="text-light">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis, vel.
+                        </label>
+                    </div>
+                </div>
             </div>
-            <h1 class="centered">Mode settings</h1>
+            <div id="mode-holder">
+                <h1 class="centered">Choose mode</h1>
+                <div id="mode_list" class="modes-wrapper">
+                    <label id="mode-static">
+                        <input type="radio" name="modes-radio" mode-id="0">
+                        <div>Static mode</div>
+                    </label>
+                    <label id="mode-rainbow">
+                        <input type="radio" name="modes-radio" mode-id="1">
+                        <div>Rainbow mode</div>
+                    </label>
+                    <label id=" mode-wave">
+                        <input type="radio" name="modes-radio" mode-id="2">
+                        <div>
+                            Wave mode
+                        </div>
+                    </label>
+                    <label id=" mode-sky">
+                        <input type="radio" name="modes-radio" mode-id="3">
+                        <div>Sky mode</div>
+                    </label>
+                </div>
+                <h1 class="centered">Mode settings</h1>
 
-            <template id="skeleton-template">
-                <div>
-                    <div class="skeleton-text list-skeleton-text"></div>
-                    <div class="skeleton-text"></div>
-                </div>
-            </template>
-            <template id="list-template">
-                <div>
-                    <label>
-                        Parameter
-                    </label>
-                    <input type="number" />
-                    <label class="info-button">
-                        Info
-                        <input type="checkbox"></input>
-                        <i class="fas fa-circle-info"></i>
-                    </label>
-                    <label class="text-light">
-                    </label>
-                </div>
-            </template>
+                <template id="skeleton-template">
+                    <div>
+                        <div class="skeleton-text list-skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                </template>
+                <template id="list-template">
+                    <div>
+                        <label>
+                            Parameter
+                        </label>
+                        <input type="number" />
+                        <label class="info-button">
+                            Info
+                            <input type="checkbox"></input>
+                            <i class="fas fa-circle-info"></i>
+                        </label>
+                        <label class="text-light">
+                        </label>
+                    </div>
+                </template>
 
-            <div class="list" id="list-container">
-                <div>
-                    <div class="skeleton-text list-skeleton-text"></div>
-                    <div class="skeleton-text"></div>
+                <div class="list" id="list-container">
+                    <div>
+                        <div class="skeleton-text list-skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
+                    <div>
+                        <div class="skeleton-text list-skeleton-text"></div>
+                        <div class="skeleton-text"></div>
+                    </div>
                 </div>
-                <div>
-                    <div class="skeleton-text list-skeleton-text"></div>
-                    <div class="skeleton-text"></div>
+            </div>
+            <div id="brightness-holder">
+                <h1 class="centered">Brightness</h1>
+                <div class="list">
+                    <div>
+                        <label>
+                            Strength
+                        </label>
+                        <input type="range" />
+                        <label class="info-button">
+                            Info
+                            <input type="checkbox"></input>
+                            <i class="fas fa-circle-info"></i>
+                        </label>
+                        <label class="text-light">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nobis, vel.
+                        </label>
+                    </div>
                 </div>
+            </div>
+
+            <div class="list-button-holder">
+                <button id="discard-button" class="list-button">
+                    Discard
+                </button>
+                <button id="apply-button" class="list-button">
+                    Add
+                </button>
             </div>
         </div>
-
-        <footer></footer>
+    </div>
 </body>

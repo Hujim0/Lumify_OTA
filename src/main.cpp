@@ -330,6 +330,8 @@ void ApplyPreferences(String data)
   currentLanguage = preferences["lang"].as<String>();
 
   preferences.garbageCollect();
+
+  _log.SaveLogs = preferences["debug"].as<bool>();
 }
 
 void LoadTimeEvents()

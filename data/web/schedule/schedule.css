@@ -37,7 +37,6 @@
     transform: translate(1px, 0px);
 }
 
-
 .timelist-element {
     margin: 1rem;
     background-color: var(--ink-grey);
@@ -54,14 +53,14 @@
     overflow: hidden;
 }
 
-.timelist-element>label {
+.timelist-element > label {
     grid-column: 1;
     margin-left: 1rem;
     font-size: 25px;
     font-weight: bold;
 }
 
-.timelist-element>div {
+.timelist-element > div {
     grid-column: 3;
     /* columns: 2; */
     justify-self: end;
@@ -87,45 +86,47 @@
     transition: all 0.1s;
 }
 
-.full-screen>div {
+.full-screen > div {
     padding-top: 0.5rem;
     padding-bottom: 2rem;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    margin-left: 12.5vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
     margin-top: 5rem;
     /* min-height: 50%; */
-    max-width: 75%;
-    border-radius: 50px;
+    max-width: 90%;
+    border-radius: 80px;
     border: solid 4px var(--ink-1);
     background-color: var(--background);
 }
 
 .modes-wrapper {
     transform: none !important;
-    max-width: 100% !important;
-    min-width: 60% !important;
+    max-width: 50% !important;
+    overflow-y: visible !important;
 }
 
 .list {
-    margin-left: 1rem !important;
-    margin-right: 1rem !important;
-    min-width: 80% !important;
-    max-width: 80% !important;
-    margin-right: 1rem !important;
+    /* align-items: center; */
+    margin-left: 1.5rem !important;
+    margin-right: 1.5rem !important;
+    max-width: 100% !important;
+    /* padding-left: 1.75rem; */
+    /* margin-right: 1rem !important; */
 }
 
 .cross-holder {
     position: absolute;
-    top: 21%;
-    right: 15%;
+    top: 120px;
+    right: 9%;
 }
 
 .cross-holder button {
-    height: 2rem;
-    width: 2rem;
+    height: 3rem;
+    width: 3rem;
     background-color: transparent;
     border: none;
     border-radius: 100%;
@@ -145,5 +146,19 @@
 .cross-holder button i {
     position: inherit;
     color: var(--text-color);
-    font-size: 35px;
+    font-size: 2.5rem;
+}
+
+#brightness-holder {
+    width: 100%;
+}
+#mode-holder {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+#settings-holder {
+    min-width: 100%;
 }

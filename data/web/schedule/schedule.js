@@ -1,14 +1,19 @@
 const popup_cross = document.getElementById("popup-cross");
 const popup_holder = document.getElementById("popup-holder");
 
+const discard_button = document.getElementById("discard-button");
+const apply_button = document.getElementById("apply-button");
+
 var prev_mode_id = 0;
 var prev_mode_args = null;
 
 var current_time_events = null;
 
-popup_cross.addEventListener("click", (event) => {
-    TogglePopup();
-});
+var current_time_event = null;
+
+popup_cross.addEventListener("click", TogglePopup());
+discard_button.addEventListener("click", TogglePopup());
+apply_button.addEventListener("click", TogglePopup());
 
 function TogglePopup() {
     if (popup_holder.classList.contains("hidden")) {

@@ -187,3 +187,42 @@
 .svg-waves .shape-fill {
     fill: #ffffff;
 }
+
+.list-button {
+    border-radius: 15px;
+    height: 100%;
+    width: 75%;
+    border: 4px solid transparent;
+
+    align-self: center;
+    background-color: var(--ink-2);
+    font-size: 20px;
+    color: var(--text-color);
+    transition: all 0.1s ease-in-out;
+    box-shadow: 4px 4px 8px 0px rgba(0, 0, 0, 0.2);
+}
+
+.list-button:hover {
+    color: var(--ink-0);
+    transform: scale(1.1);
+    border-color: var(--ink-3);
+}
+
+.list-button:active {
+    background: var(--nice-orange);
+    border-color: white;
+    transform: scale(1) !important;
+}
+
+.list-button-holder {
+    display: grid;
+    justify-items: center;
+    grid-template-columns: 1fr 1fr;
+    height: 50px;
+
+    padding-top: 3rem;
+    margin-left: 9vw;
+    margin-right: 9vw;
+    width: 90%;
+    column-gap: 10%;
+}

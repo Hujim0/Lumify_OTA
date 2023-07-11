@@ -45,6 +45,7 @@ body {
 }
 
 label,
+button,
 h1 {
     color: var(--text-color);
     font-style: normal;
