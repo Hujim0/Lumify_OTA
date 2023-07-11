@@ -7,11 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="/en/home">
     <link rel="alternate" hreflang="ru" href="/ru/home">
-    <link rel="stylesheet" href="/data/web/styles_global.css" type="text/css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" />
+    <link rel="stylesheet" href="/data/web/styles_global.css" type="text/css" />
     <link rel="stylesheet" href="/data/web/side_menu.css" type="text/css" />
     <link rel="stylesheet" href="/data/web/modes_style.css" type="text/css" />
 
+    <script defer src="/data/web/websocket.js" type="text/javascript"></script>
     <script defer src="/data/web/modes_list.js" type="text/javascript"></script>
     <script defer src="/data/web/home/home.js" type="text/javascript"></script>
     <script defer src="/data/web/side_menu.js" type="text/javascript"></script>
@@ -25,18 +26,21 @@
         <i id="menu_cross" class="fa-solid fa-xmark"></i>
         <div>
             <a href="home" class="underlined">Home</a>
-            <a href="schedule">Scheldule</a>
-            <!-- <a href="debug">Debug</a> -->
+            <a href="schedule">Schedule</a>
+            <div id="menu-dev-holder"></div>
             <a href="../changelang?lang=ru">Русская версия</a>
-            <!-- <a href="other">Other</a> -->
             <hr />
             <a href="https://github.com/Hujim0">Made by hujimo</a>
-            <label>Licence - MIT</label>
+            <label>License - MIT</label>
         </div>
+        <template id="menu-dev-template">
+            <a href="../log">[dev] Debug</a>
+            <a href="../update">[dev] Update</a>
+            <!-- <a href="other">Other</a> -->
+        </template>
     </div>
     <h1 class="centered">Home</h1>
     <div class="main-holder">
-
 
         <label class="checkbox-container text centered">
             Light switch
@@ -106,7 +110,7 @@
             </div>
         </template>
 
-        <div class="list" id="list-containter">
+        <div class="list" id="list-container">
             <div>
                 <div class="skeleton-text list-skeleton-text"></div>
                 <div class="skeleton-text"></div>

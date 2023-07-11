@@ -55,6 +55,15 @@ String GetModeArgs(int id)
     return data;
 }
 
+String GetModeArgsFilePath(String id)
+{
+    String path = "/modes/mode" + id + ".json";
+
+    if (!LittleFS.exists(path))
+        return "";
+    return path;
+}
+
 void SaveModeArgs(int id, String json)
 {
     File file = LittleFS.open("/modes/mode" + String(id) + ".json", "w");
@@ -62,12 +71,25 @@ void SaveModeArgs(int id, String json)
     file.close();
 }
 
-String GetElements(int id)
+// String GetElements(int id)
+// {
+//     String path = "/modes/elements/elements" + String(id) + ".json";
+
+//     if (!LittleFS.exists(path))
+//         return "";
+
+//     File file = LittleFS.open(path, "r");
+//     String data = file.readString();
+//     file.close();
+//     return data;
+// }
+String GetElementsFilePath(String lang, String id)
 {
-    File file = LittleFS.open("/modes/elements/elements" + String(id) + ".json", "r");
-    String data = file.readString();
-    file.close();
-    return data;
+    String path = "modes/elements/" + lang + "/elements" + id + ".json";
+
+    if (!LittleFS.exists(path))
+        return "";
+    return path;
 }
 
 String GetTimeEvents()

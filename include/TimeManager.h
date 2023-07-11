@@ -24,8 +24,8 @@ private:
 
     int seconds;
     void UpdateSeconds();
-    int minuts;
-    void UpdateMinuts();
+    int minutes;
+    void UpdateMinutes();
     int hours;
     void UpdateHours();
 

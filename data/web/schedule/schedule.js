@@ -11,15 +11,26 @@ popup_cross.addEventListener("click", (event) => {
 });
 
 function TogglePopup() {
-
     if (popup_holder.classList.contains("hidden")) {
         prev_mode_id = current_mode_id;
         prev_mode_args = current_mode;
-    }
-    else {
+    } else {
         ChangeMode(prev_mode_id);
         SendJson(prev_mode_args);
     }
 
     popup_holder.classList.toggle("hidden");
 }
+
+window.addEventListener(ON_GET_PREFERENCES_EVENT, () => {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("GET", "../data/time_events.json");
+
+    xhr.send();
+
+    xhr.onload = () => {
+        current_time_events = JSON.parse(xhr.responseText);
+        console.log(current_time_events);
+    };
+});

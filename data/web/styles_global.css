@@ -1,32 +1,31 @@
-@import url('https://fonts.googleapis.com/css2?family=Lato&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Lato&family=Raleway&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato&family=Raleway&display=swap");
 
 :root {
     --ink-0: #252525;
-    --ink-1: #191D21;
+    --ink-1: #191d21;
     --ink-2: #586068;
     --ink-2-grey: rgb(139, 139, 139);
-    --ink-3: #ACB8C2;
-    --ink-4: #CDD9E3;
-    --ink-5: #E8EEF3;
+    --ink-3: #acb8c2;
+    --ink-4: #cdd9e3;
+    --ink-5: #e8eef3;
     --ink-grey: #5d5d5d;
 
     --background: #393939;
     --text-color: white;
-    --utility-active: #1814E4;
+    --utility-active: #1814e4;
 
-    --nice-mint: #23E9B4;
-    --nice-red: #FF5A5A;
-    --nice-orange: #FFAC4B;
-    --nice-blue: #91D7E0;
+    --nice-mint: #23e9b4;
+    --nice-red: #ff5a5a;
+    --nice-orange: #ffac4b;
+    --nice-blue: #91d7e0;
 
-    --accent-yellow: #FDEBC9;
-    --accent-pink: #FDC9D2;
-    --accent-orange: #F5D4C1;
-    --accent-purple: #DED2F9;
-    --accent-green: #D0F1EB;
-    --accent-blue: #C9EAFD;
+    --accent-yellow: #fdebc9;
+    --accent-pink: #fdc9d2;
+    --accent-orange: #f5d4c1;
+    --accent-purple: #ded2f9;
+    --accent-green: #d0f1eb;
+    --accent-blue: #c9eafd;
 }
 
 html,
@@ -37,7 +36,7 @@ body {
     padding: 0;
     overflow: hidden;
     font-size: 20px;
-    font-family: 'Lato', sans-serif;
+    font-family: "Lato", sans-serif;
     background-color: var(--ink-0);
     letter-spacing: -0.5px;
 
@@ -81,13 +80,13 @@ h1 {
 
 .skeleton-text {
     /* margin-left: 20px; */
-    height: .8em;
+    height: 0.8em;
     display: flex;
     width: 90%;
-    margin-top: .5rem;
+    margin-top: 0.5rem;
     margin-right: 1rem;
-    opacity: .7;
-    border-radius: .5rem;
+    opacity: 0.7;
+    border-radius: 0.5rem;
     animation: skeleton-animation 1s linear infinite alternate;
     background-color: white;
     flex-wrap: wrap;

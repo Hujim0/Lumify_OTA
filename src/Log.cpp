@@ -6,17 +6,18 @@ Log *Log::Instance = 0;
 
 void Log::Println(String msg)
 {
+    if (gotTime)
+        msg = TimeManager::Instance->GetCurrentFormattedTime() + " " + msg;
+
 #ifdef DEBUG_SERIAL
     Serial.println(msg);
 #endif
+
 #ifdef DEBUG_FILE
     if (!SaveLogs)
         return;
 
     currentFile = LittleFS.open(GetFileName(currentFileNumber), "a");
-    if (gotTime)
-        msg = "[" + TimeManager::Instance->GetCurrentFormattedTime() + "] " + msg;
-
     currentFile.println(msg);
     currentFile.close();
 

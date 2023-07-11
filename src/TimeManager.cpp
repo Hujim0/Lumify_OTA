@@ -10,7 +10,10 @@ TimeManager *TimeManager::Instance = 0;
 void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOfTheWeek)
 {
     if (isSetuped)
+    {
+        MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
         return;
+    }
 
     Instance = this;
 
@@ -21,10 +24,12 @@ void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOf
     MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
 
     hours = (epoch_time_seconds / 3600);
-    minuts = (epoch_time_seconds % 3600) / 60;
+    minutes = (epoch_time_seconds % 3600) / 60;
     seconds = epoch_time_seconds % 60;
 
     isSetuped = true;
+
+    sprintln(LOG_PREFIX + "Got time! " + GetCurrentFormattedTime() + ", day of the week: " + String(dayOfTheWeek));
 }
 
 void TimeManager::Update()
@@ -50,14 +55,14 @@ void TimeManager::UpdateHours()
     // probably unnecessary
 }
 
-void TimeManager::UpdateMinuts()
+void TimeManager::UpdateMinutes()
 {
     int timeMins = (epoch_time_day_seconds % 3600) / 60;
 
-    if (minuts == timeMins)
+    if (minutes == timeMins)
         return;
 
-    minuts = timeMins;
+    minutes = timeMins;
 
     UpdateHours();
 
@@ -88,7 +93,7 @@ void TimeManager::UpdateSeconds()
 
     seconds = timeSecs;
 
-    UpdateMinuts();
+    UpdateMinutes();
 
     // // time events (second update)
 
@@ -113,9 +118,9 @@ String TimeManager::GetCurrentFormattedTime()
     if (hours < 10)
         time += "0";
     time += String(hours) + ":";
-    if (minuts < 10)
+    if (minutes < 10)
         time += "0";
-    time += String(minuts) + ":";
+    time += String(minutes) + ":";
     if (seconds < 10)
         time += "0";
     time += String(seconds);
@@ -126,7 +131,7 @@ String TimeManager::GetCurrentFormattedTime()
 String TimeManager::FormatTime(int epoch)
 {
     int _hours = epoch / 3600;
-    int _minuts = (epoch % 3600) / 60;
+    int _minutes = (epoch % 3600) / 60;
     int _seconds = epoch % 60;
 
     String time = "";
@@ -134,9 +139,9 @@ String TimeManager::FormatTime(int epoch)
     if (_hours < 10)
         time += "0";
     time += String(_hours) + ":";
-    if (_minuts < 10)
+    if (_minutes < 10)
         time += "0";
-    time += String(_minuts) + ":";
+    time += String(_minutes) + ":";
     if (_seconds < 10)
         time += "0";
     time += String(_seconds);

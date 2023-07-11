@@ -16,17 +16,15 @@
 #include <main.h>
 #include <ModeHandler.h>
 #include <NetworkManager.h>
-// #include <ESPAsync_WiFiManager.h>
 #include <FileSystem.h>
 #include <TimeManager.h>
+#include <global.h>
 
 #include <ArduinoJson.h>
 
 CRGB leds[NUMPIXELS];
 
 Log _log = Log();
-
-#define sprintln _log.Println
 
 ModeHandler modeHandler;
 NetworkManager network = NetworkManager();
@@ -102,9 +100,9 @@ void AddServerHandlers()
 
   network.ServeStatic("/data", LittleFS, "/", "max-age=600");
 
-  // global
-  network.AddWebPageHandler("http://local_lumify/", [](AsyncWebServerRequest *request)
-                            { request->redirect(network.getUrl() + currentLanguage + "/home"); });
+  // // global
+  // network.AddWebPageHandler("http://local_lumify/", [](AsyncWebServerRequest *request)
+  //                           { request->redirect(network.getUrl() + currentLanguage + "/home"); });
 
   network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
                             { request->redirect("/" + currentLanguage + "/home"); });
@@ -124,7 +122,7 @@ void AddServerHandlers()
     {
         modeHandler.ChangeMode(id, args.c_str());
 
-        SaveModeArgs(id, args);
+        // SaveModeArgs(id, args);
 
         StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
         deserializeJson(preferences, LoadPreferences());
@@ -136,8 +134,19 @@ void AddServerHandlers()
         request->beginResponse(HTTP_POST, "text/json", args)); });
 
   network.AddWebPageHandler("/elements", [](AsyncWebServerRequest *request)
-                            { request->send(
-                                  request->beginResponse(LittleFS, "modes/elements/" + currentLanguage + "/elements" + request->arg("id") + ".json", "text/json")); });
+                            { 
+    String path = GetElementsFilePath(currentLanguage, request->arg("id"));
+              
+    if (path == "") 
+    {
+      sprintln("[ERROR] Not found elements file! id=" + request->arg("id"));
+      request->send(404);
+      return;  
+    }
+
+    request->send(
+        request->beginResponse(LittleFS, path, "text/json")); });
+
   network.AddWebPageHandler("/preferences", [](AsyncWebServerRequest *request)
                             { request->send(
                                   request->beginResponse(LittleFS, "preferences.json", "text/json")); });
@@ -147,23 +156,37 @@ void AddServerHandlers()
         ChangeLanguage(request->arg("lang"));
         request->redirect("/" + request->arg("lang") + "/home"); });
 
-  // network.AddWebPageGetter("/post_time", [](AsyncWebServerResponse *response) {
-  //});
-
   network.AddWebPageHandler("/log", [](AsyncWebServerRequest *request)
                             {
-    String FileName = "";
+    String id = "";
+
     if (request->hasArg("id"))
     {
-      FileName = _log.GetFileName(request->arg("id"));
+      id = request->arg("id");
     }
     else
     {
-      FileName = _log.GetFileName(_log.currentFileNumber);
+      id = _log.currentFileNumber;
+    }
+
+    String FileName = _log.GetFileName(id);
+
+    if (!LittleFS.exists(FileName))
+    {
+      request->send(404);
+      return;
     }
 
     request->send(
-        request->beginResponse(LittleFS, FileName, "text/json")); });
+        request->beginResponse(LittleFS, FileName, "text/plain")); });
+
+  network.AddWebPageHandler("/time", [](AsyncWebServerRequest *request)
+                            { 
+    timeManager.Setup(&modeHandler, request->arg("epoch").toInt(), request->arg("dayoftheweek").toInt());
+    _log.gotTime = true; 
+    
+    request->send(200); });
+
   //====================================================
 
   // pages
@@ -183,12 +206,6 @@ void AddServerHandlers()
                                   request->beginResponse(LittleFS, "web/schedule/schedule_ru.html", "text/html")); });
 }
 
-// void AddWebResponce(const char *page_name, const char *file_path, const char *content_type)
-// {
-//     network.AddWebPageHandler(page_name, [](AsyncWebServerRequest *request)
-//                               { request->send(
-//                                     request->beginResponse(LittleFS, file_path, content_type)); });
-// }
 void ChangeLanguage(String _lang)
 {
   currentLanguage = _lang;
@@ -204,7 +221,7 @@ void ChangeLanguage(String _lang)
 void fiveSecondTimer()
 {
 #ifdef DEBUG_HEAP
-  sprintln("Avalible ram: " + String(ESP.getFreeHeap()) + " bytes");
+  sprintln("[ESP] Available ram: " + String(ESP.getFreeHeap()) + " bytes");
 #endif
 
   network.CleanUp();
@@ -270,11 +287,6 @@ void OnWebSocketMessage(String data)
     bool value = doc["value"].as<bool>();
     modeHandler.LightSwitch(value);
     preferences[LIGHT_SWITCH] = value;
-  }
-  else if (doc["event"] == EPOCH_TIME)
-  {
-    timeManager.Setup(&modeHandler, doc["value"].as<int>(), doc["dayOfTheWeek"].as<int>());
-    _log.gotTime = true;
   }
 
   SavePreferences(&preferences);

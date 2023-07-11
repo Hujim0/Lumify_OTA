@@ -15,9 +15,11 @@ void SavePreferences(String);
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *);
 String GetModeArgs(int);
 void SaveModeArgs(int, String);
-String GetElements(int);
 void FSBegin();
 String GetTimeEvents();
 // void Save
+
+String GetModeArgsFilePath(String id);
+String GetElementsFilePath(String lang, String id);
 
 #endif

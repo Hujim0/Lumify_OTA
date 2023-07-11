@@ -7,6 +7,8 @@
 #pragma once
 
 #include <NetworkDefines.h>
+#include <AsyncJson.h>
+#include <ArduinoJson.h>
 #include <Arduino.h>
 #include <ESPAsync_WiFiManager.hpp>
 
@@ -39,13 +41,6 @@ private:
     String url;
     String stringPort;
 
-    // IPAddress stationIP = IPAddress(0, 0, 0, 0);
-    // IPAddress gatewayIP = IPAddress(192, 168, 2, 1);
-    // IPAddress netMask = IPAddress(255, 255, 255, 0);
-
-    // IPAddress dns1IP = gatewayIP;
-    // IPAddress dns2IP = IPAddress(8, 8, 8, 8);
-
 public:
     void handleWebSocketMessage(void *, uint8_t *, size_t);
 
@@ -63,9 +58,11 @@ public:
 
     void AddWebPageHandler(String uri, ArRequestHandlerFunction function);
     void AddWebPageHandler(const char *uri, ArRequestHandlerFunction function);
-    void AddWebPageGetter(const char *uri, ArRequestHandlerFunction function);
-    void ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_contol = (const char *)__null);
+    void AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func);
+
+    void ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_control = (const char *)__null);
     void CheckStatus();
+    void ConfigureTZ(ESPAsync_WiFiManager &);
 
     static NetworkManager *Instance;
     String getUrl();

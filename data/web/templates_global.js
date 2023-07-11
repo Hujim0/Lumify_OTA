@@ -1,5 +1,3 @@
-const CheckBox = () => {
-
-}
+const CheckBox = () => {};
 
 export default CheckBox;

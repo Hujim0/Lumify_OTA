@@ -92,9 +92,10 @@ void NetworkManager::AddWebPageHandler(const char *uri, ArRequestHandlerFunction
     server.on(uri, HTTP_GET, func);
 }
 
-void NetworkManager::AddWebPageGetter(const char *uri, ArRequestHandlerFunction func)
+void NetworkManager::AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func)
 {
-    server.on(uri, HTTP_POST, func);
+    // server.on(uri, HTTP_POST, func, upload, body);
+    server.addHandler(new AsyncCallbackJsonWebHandler(uri, func));
 }
 
 void NetworkManager::CheckStatus()
@@ -126,9 +127,9 @@ void NetworkManager::CleanUp()
     webSocket.cleanupClients();
 }
 
-void NetworkManager::ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_contol)
+void NetworkManager::ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_control)
 {
-    server.serveStatic(uri, fs, path, cache_contol);
+    server.serveStatic(uri, fs, path, cache_control);
 }
 
 String NetworkManager::getUrl()
@@ -142,8 +143,6 @@ void NetworkManager::TryReconnect()
 }
 bool NetworkManager::Begin(const char *ssid, const char *pw)
 {
-    dnsServer.start(PORT, DNS_SERVER_URL, ip);
-
     Instance = this;
 
     stringPort = ":" + String(PORT);
@@ -195,9 +194,10 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
 
     sprintln(line);
 
-    // ESPAsync_WiFiManager wifiManager(&server, &dnsServer, DNS_SERVER_URL);
-    // wifiManager.setMinimumSignalQuality(-1);
-    // wifiManager.setSTAStaticIPConfig(stationIP, gatewayIP, netMask, dns1IP, dns2IP);
+    ESPAsync_WiFiManager wifiManager(&server, &dnsServer, DNS_SERVER_URL);
+    wifiManager.setMinimumSignalQuality(-1);
+
+    // ConfigureTZ(wifiManager);
 
     return true;
 }
@@ -205,4 +205,39 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
 void NetworkManager::loop()
 {
     MDNS.update();
+}
+
+void NetworkManager::ConfigureTZ(ESPAsync_WiFiManager &manager)
+{
+
+    String tempTZ = manager.getTimezoneName();
+
+    // if (strlen(tempTZ.c_str()) < sizeof(WM_config.TZ_Name) - 1)
+    //     strcpy(WM_config.TZ_Name, tempTZ.c_str());
+    // else
+    //     strncpy(WM_config.TZ_Name, tempTZ.c_str(), sizeof(WM_config.TZ_Name) - 1);
+
+    const char *TZ_Result = manager.getTZ(tempTZ);
+
+    // if (strlen(TZ_Result) < sizeof(WM_config.TZ) - 1)
+    //     strcpy(WM_config.TZ, TZ_Result);
+    // else
+    //     strncpy(WM_config.TZ, TZ_Result, sizeof(WM_config.TZ_Name) - 1);
+
+    // if (strlen(WM_config.TZ_Name) > 0)
+    // {
+    //     sprintln("Saving current TZ_Name =" + WM_config.TZ_Name + ", TZ = " + WM_config.TZ);
+    // }
+
+    configTime(TZ_Result, "pool.ntp.org");
+
+    static time_t now;
+
+    now = time(nullptr);
+
+    if (now > 1451602800)
+    {
+        Serial.print("Local Date/Time: ");
+        Serial.print(ctime(&now));
+    }
 }
