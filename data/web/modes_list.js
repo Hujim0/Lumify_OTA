@@ -6,13 +6,10 @@ var gotPreferences = false;
 
 const OPEN_STREAM = "open_stream";
 
-const LIGHT_SWITCH = "light_switch";
-const BRIGHTNESS = "brightness";
-const MODE_SWITCH = "mode_switch";
-const REQUEST_ARGS = "mode_args_request";
-
-const ON_GET_ELEMENTS_EVENT = "onElementsMode";
+const ON_GET_ELEMENTS_EVENT = "onGetModeElements";
 const ON_GET_PREFERENCES_EVENT = "onGetPreferences";
+
+var debug = true;
 
 class espEvent {
     event;
@@ -52,29 +49,15 @@ function GetPreferences() {
 function SendTime() {
     var date = new Date();
 
-    var _event = new espEvent(
-        "epoch_time",
-        date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()
-    );
-
-    _event.dayOfTheWeek = date.getDay();
-
-    const xhr = new XMLHttpRequest();
-
-    xhr.open(
-        "GET",
+    const query_string =
         "/time?epoch=" +
-            String(
-                date.getHours() * 3600 +
-                    date.getMinutes() * 60 +
-                    date.getSeconds()
-            ) +
-            "&dayoftheweek=" +
-            String(date.getDay())
-    );
-    xhr.send();
+        String(
+            date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()
+        ) +
+        "&dayoftheweek=" +
+        String(date.getDay());
 
-    // SendJson(_event);
+    sendGetRequest(query_string);
 }
 
 //---------------------------------------------------------------------------
@@ -82,17 +65,21 @@ function SendTime() {
 var modes = document.getElementById("mode_list").children;
 for (var i = 0; i < modes.length; i++) {
     modes[i].addEventListener("input", (event) => {
-        GetMode(event.target.getAttribute("mode-id"), false);
-        CreateSkeleton();
+        GetMode(event.target.getAttribute("mode-id"), true);
     });
 }
 
 window.addEventListener(ON_GET_PREFERENCES_EVENT, (event) => {
     var mode_id = event.detail.mode;
+    debug = event.detail.debug;
 
-    modes[mode_id].children[0].checked = true;
-    GetMode(mode_id, true);
+    setModesCarouselCheckedID(mode_id);
+    GetMode(mode_id, false);
 });
+
+function setModesCarouselCheckedID(id) {
+    modes[id].children[0].checked = true;
+}
 
 //---------------------------------------------------------------------------
 
@@ -103,35 +90,26 @@ var skeleton_template = document.getElementById("skeleton-template");
 var loaded_first = "";
 
 function ChangeMode(id) {
-    const xhr_args = new XMLHttpRequest();
-
-    var get_string = "/mode?id=" + id;
-
-    get_string += "&change=true";
-
-    xhr_args.open("GET", get_string, true);
-
-    xhr_args.send();
+    // sendGetRequest("/mode?id=" + id + "&change");
 }
 
-function GetMode(id, RequestMode = false) {
-    // SendJson(new espEvent(REQUEST_ARGS, id));
+function GetMode(id, change = true, save = true, onLoaded = null) {
+    CreateSkeleton();
 
     current_mode_id = id;
 
     loaded_first = "";
 
-    const xhr_args = new XMLHttpRequest();
-
     var get_string = "/mode?id=" + id;
 
-    if (RequestMode) {
-        get_string += "&request=true";
+    if (change) {
+        get_string += "&change";
+    }
+    if (save) {
+        get_string += "&save";
     }
 
-    xhr_args.open("GET", get_string, true);
-
-    xhr_args.onload = () => {
+    var xhr_args = sendGetRequest(get_string, () => {
         if (xhr_args.status == 404) {
             alert("cant get args - file not found!");
             return;
@@ -143,31 +121,28 @@ function GetMode(id, RequestMode = false) {
             loaded_first = "args";
         } else {
             CreateModeElements(current_elements);
+            if (onLoaded != null) {
+                onLoaded(xhr_args.responseText);
+            }
         }
-    };
-    xhr_args.send();
+    });
 
-    const xhr_elements = new XMLHttpRequest();
-
-    xhr_elements.open("GET", "/elements?id=" + id, true);
-
-    xhr_elements.onload = () => {
-        if (xhr_args.status == 404) {
+    var xhr_elements = sendGetRequest("/elements?id=" + id, () => {
+        if (xhr_elements.status == 404) {
             alert("cant get elems - file not found!");
             return;
         }
         // console.log(xhr_elems.responseText);
-
         current_elements = JSON.parse(xhr_elements.responseText)["elems"];
-
         if (loaded_first == "") {
             loaded_first = "elems";
         } else {
             CreateModeElements(current_elements);
+            if (onLoaded != null) {
+                onLoaded(xhr_args.responseText);
+            }
         }
-    };
-
-    xhr_elements.send();
+    });
 }
 
 var current_info_inputs = [];
@@ -191,84 +166,40 @@ function CreateModeElements(_elements) {
     current_info_inputs = [];
 
     for (var i = 0; i < _elements.length; i++) {
-        var child_element = list_template.content.cloneNode(true).children[0];
-
-        child_element.children[0].innerText = _elements[i]["name"];
-
-        child_element.children[1] = SetUpInputChild(
-            child_element.children[1],
-            _elements[i]
+        var list_element = new listElement().ConstructFull(
+            list_template.content.cloneNode(true).children[0],
+            _elements[i].name,
+            _elements[i].desc,
+            _elements[i].arg_name,
+            _elements[i].input_props,
+            current_mode[_elements[i].arg_name],
+            current_info_inputs
         );
 
-        if (_elements[i].desc == null) {
-            child_element.children[2].hidden = true;
-            list_container.appendChild(child_element);
-            return;
+        if (
+            list_element.input_element.type == "color" ||
+            list_element.input_element.type == "range"
+        ) {
+            addStreamEvent(
+                list_element.input_element,
+                list_element.input_element.json_arg_name
+            );
         }
-        child_element.children[2].children[0]["arg_id"] = i;
-        child_element.children[2].children[0].addEventListener(
-            "input",
-            (event) => {
-                // window.dispatchEvent(new CustomEvent("ARG_INFO_ID_UPDATE", {
-                //     detail: {
-                //         state: event.target.checked,
-                //         arg_info_id: event.target["arg_id"]
-                //     }
-                // }));
 
-                current_info_inputs[event.target["arg_id"]].classList.toggle(
-                    "active"
-                );
-            }
-        );
+        list_element.input_element.addEventListener("change", (event) => {
+            current_mode[event.target.json_arg_name] =
+                event.target[event.target.input_type_getter];
 
-        current_info_inputs.push(child_element.children[3]);
-
-        child_element.children[3].innerText = _elements[i].desc;
-        list_container.appendChild(child_element);
-    }
-}
-
-function SetUpInputChild(input_element, _element) {
-    for (var x = 0; x < _element.input_props.length; x++) {
-        var attribute = _element.input_props[x].split("=");
-
-        input_element[attribute[0]] = attribute[1];
-    }
-
-    input_element.mode_arg_name = _element.arg_name;
-
-    var input_type_getter = "value";
-    if (input_element.type == "checkbox") input_type_getter = "checked";
-
-    input_element.input_type_getter = input_type_getter;
-
-    input_element[input_type_getter] = current_mode[_element.arg_name];
-
-    if (input_element.type == "color" || input_element.type == "range") {
-        input_element.addEventListener("input", (event) => {
-            if (!sentStreamEvent) {
-                console.log("starting stream event");
-
-                SendJson(new espEvent(OPEN_STREAM, event.target.mode_arg_name));
-
-                sentStreamEvent = true;
-            }
-            sendStream(event.target.value);
+            if (debug) console.log();
+            SendJson(current_mode);
+            sendPostRequest(
+                "/mode?id=" + current_mode_id + "&save",
+                current_mode
+            );
         });
 
-        input_element.addEventListener("change", EndStream);
+        list_container.appendChild(list_element.div);
     }
-
-    input_element.addEventListener("change", (event) => {
-        current_mode[event.target.mode_arg_name] =
-            event.target[event.target.input_type_getter];
-
-        console.log(JSON.stringify(current_mode));
-        SendJson(current_mode);
-    });
-
-    return input_element;
 }
 
 class listElement {
@@ -281,27 +212,25 @@ class listElement {
     // </label>
     // <label class="text-light">Description</label>
 
-    constructor(
+    SetInputValue(value) {
+        this.input_element[this.input_element.input_type_getter] = value;
+    }
+
+    ConstructInput(
         div,
-        setting_name,
-        setting_description,
         input_name,
-        input_type,
         input_props,
+        input_value,
         info_inputs_array
     ) {
         this.div = div;
-        this.setting_name = setting_name;
-
-        this.div.children[0].innerText = this.setting_name;
-        this.setting_description = setting_description;
 
         this.info_button_label = this.div.children[2];
 
         //description---------------------------------
         if (
-            this.setting_description == null ||
-            this.setting_description == ""
+            this.div.children[3].innerText == null ||
+            this.div.children[3].innerText == ""
         ) {
             this.info_button_label.hidden = true;
         } else {
@@ -318,13 +247,11 @@ class listElement {
 
             info_inputs_array.push(this.div.children[3]);
             //description label
-            this.div.children[3].innerText = _elements[i].desc;
         }
         //input-----------------------------------------
 
         this.input_props = input_props;
         this.input_name = input_name;
-        this.input_type = input_type;
         this.input_element = this.div.children[1];
 
         for (var i = 0; i < this.input_props.length; i++) {
@@ -333,15 +260,41 @@ class listElement {
             this.input_element[attribute[0]] = attribute[1];
         }
 
-        this.input_element.mode_arg_name = this.input_name;
+        this.input_element.json_arg_name = this.input_name;
 
         var input_type_getter = "value";
-        if (this.input_type == "checkbox") {
+        if (this.input_element.type == "checkbox") {
             input_type_getter = "checked";
         }
 
         this.input_element.input_type_getter = input_type_getter;
 
-        return this.div;
+        this.input_element[input_type_getter] = input_value;
+
+        return this;
+    }
+
+    ConstructFull(
+        div,
+        setting_name,
+        setting_description,
+        input_name,
+        input_props,
+        input_value,
+        info_inputs_array
+    ) {
+        this.setting_name = setting_name;
+
+        div.children[0].innerText = this.setting_name;
+        div.children[3].innerText = setting_description;
+        this.setting_description = setting_description;
+
+        return this.ConstructInput(
+            div,
+            input_name,
+            input_props,
+            input_value,
+            info_inputs_array
+        );
     }
 }

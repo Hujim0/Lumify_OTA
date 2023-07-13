@@ -5,24 +5,13 @@ window.addEventListener(ON_GET_PREFERENCES_EVENT, (event) => {
 
     brightness_slider.value = event.detail.brightness;
 
-    brightness_slider.addEventListener("change", EndStream);
-    brightness_slider.addEventListener("change", (brightness_slider_event) => {
-        SendJson(
-            new espEvent(BRIGHTNESS, brightness_slider_event.target.value)
-        );
+    addStreamEvent(brightness_slider, BRIGHTNESS);
+
+    brightness_slider.addEventListener("change", (event) => {
+        // SendJson(new espEvent(BRIGHTNESS, event.target.value));
+        sendGetRequest("/brightness?value=" + String(event.target.value));
     });
-    brightness_slider.addEventListener("input", handleBrightnessInput);
 });
-
-function handleBrightnessInput() {
-    if (!sentStreamEvent) {
-        console.log("starting slider event");
-        SendJson(new espEvent(OPEN_STREAM, BRIGHTNESS));
-        sentStreamEvent = true;
-    }
-
-    sendStream(event.target.value);
-}
 
 //---------------------------------------------------------------------------
 
@@ -32,6 +21,11 @@ window.addEventListener(ON_GET_PREFERENCES_EVENT, (event) => {
     checkbox.checked = event.detail[LIGHT_SWITCH];
 
     checkbox.addEventListener("click", (checkbox_event) => {
-        SendJson(new espEvent(LIGHT_SWITCH, checkbox_event.target.checked));
+        // SendJson(new espEvent(LIGHT_SWITCH, checkbox_event.target.checked));
+        sendGetRequest(
+            "/light_switch?value=" +
+                (checkbox_event.target.checked ? "true" : "false") +
+                "&save"
+        );
     });
 });

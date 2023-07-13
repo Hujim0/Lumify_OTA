@@ -118,10 +118,12 @@ void AddServerHandlers()
         return;
     }
 
-    if (!request->hasArg("request"))
+    if (request->hasArg("change"))
     {
         modeHandler.ChangeMode(id, args.c_str());
-
+    }
+    if (request->hasArg("save"))
+    {
         // SaveModeArgs(id, args);
 
         StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
@@ -132,6 +134,13 @@ void AddServerHandlers()
 
     request->send(
         request->beginResponse(HTTP_POST, "text/json", args)); });
+
+  network.AddJSONBodyHandler("/mode", [](AsyncWebServerRequest *request, JsonVariant &json)
+                             {
+    serializeJson(json, Serial);
+    Serial.println(request->arg("id"));
+
+    request->send(200); });
 
   network.AddWebPageHandler("/elements", [](AsyncWebServerRequest *request)
                             { 
@@ -185,6 +194,33 @@ void AddServerHandlers()
     timeManager.Setup(&modeHandler, request->arg("epoch").toInt(), request->arg("dayoftheweek").toInt());
     _log.gotTime = true; 
     
+    request->send(200); });
+
+  network.AddWebPageHandler("/brightness", [](AsyncWebServerRequest *request)
+                            {
+    int value = request->arg("value").toInt();
+    FastLED.setBrightness(value);
+
+    if (request->hasArg("save")) {
+      StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+      deserializeJson(preferences, LoadPreferences());
+      preferences[BRIGHTNESS] = value; 
+      SavePreferences(&preferences);
+    }
+    request->send(200); });
+
+  network.AddWebPageHandler("/light_switch", [](AsyncWebServerRequest *request)
+                            {
+    bool value = request->arg("value") == "true";
+    modeHandler.LightSwitch(value);
+
+    if (request->hasArg("save"))
+    {
+      StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+      deserializeJson(preferences, LoadPreferences());
+      preferences[LIGHT_SWITCH] = value;
+      SavePreferences(&preferences);
+    }
     request->send(200); });
 
   //====================================================
@@ -264,32 +300,12 @@ void OnWebSocketMessage(String data)
     modeHandler.UpdateArgs(data.c_str());
 
     SaveModeArgs(modeHandler.current_mode_id, data);
-
-    return;
   }
+
   else if (doc["event"] == STREAM_OPEN)
   {
     current_stream = doc["value"].as<String>();
-    return;
   }
-
-  StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-  deserializeJson(preferences, LoadPreferences());
-
-  if (doc["event"] == BRIGHTNESS)
-  {
-    int value = doc["value"].as<int>();
-    FastLED.setBrightness(value);
-    preferences[BRIGHTNESS] = value;
-  }
-  else if (doc["event"] == LIGHT_SWITCH)
-  {
-    bool value = doc["value"].as<bool>();
-    modeHandler.LightSwitch(value);
-    preferences[LIGHT_SWITCH] = value;
-  }
-
-  SavePreferences(&preferences);
 
   doc.garbageCollect();
 }
@@ -329,9 +345,9 @@ void ApplyPreferences(String data)
 
   currentLanguage = preferences["lang"].as<String>();
 
-  preferences.garbageCollect();
-
   _log.SaveLogs = preferences["debug"].as<bool>();
+
+  preferences.garbageCollect();
 }
 
 void LoadTimeEvents()

@@ -99,7 +99,7 @@
 .modes-wrapper {
     transform: translateX(-3vw);
     display: flex;
-    overflow-x: scroll;
+    overflow-x: scroll !important;
     overflow-y: visible;
     padding-top: 10px;
     padding-bottom: 10px;

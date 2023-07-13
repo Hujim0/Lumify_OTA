@@ -24,8 +24,8 @@
     <div id="navbar">
         <i id="menu_cross" class="fa-solid fa-xmark"></i>
         <div>
-            <a href="home" class="underlined">Home</a>
-            <a href="schedule">Schedule</a>
+            <a href="home">Home</a>
+            <a href="schedule" class="underlined">Schedule</a>
             <div id="menu-dev-holder"></div>
             <a href="../changelang?lang=ru">Русская версия</a>
             <hr />
@@ -66,7 +66,7 @@
         </div>
     </div>
 
-    <div id="popup-holder" class="full-screen">
+    <div id="popup-holder" class="full-screen hidden">
         <div>
             <div class="cross-holder">
                 <button class="cross-button">
@@ -75,7 +75,7 @@
             </div>
             <div id="settings-holder">
                 <h1 class="centered">Settings</h1>
-                <div class="list">
+                <div class="list" id="settings_list">
                     <div>
                         <label>
                             Time
@@ -107,8 +107,8 @@
                             Type
                         </label>
                         <select>
-                            <option>Mode change</option>
-                            <option>Brightness</option>
+                            <option value="0">Brightness</option>
+                            <option value="1">Mode change</option>
                         </select>
                         <label class="info-button">
                             Info
@@ -180,7 +180,7 @@
             <div id="brightness-holder">
                 <h1 class="centered">Brightness</h1>
                 <div class="list">
-                    <div>
+                    <div id="brightness_input">
                         <label>
                             Strength
                         </label>

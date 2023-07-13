@@ -3,7 +3,11 @@ var websocket = new WebSocket(gateway);
 
 console.log("Trying to open a WebSocket connection...");
 
+const LIGHT_SWITCH = "light_switch";
+const BRIGHTNESS = "brightness";
+
 const STREAM_DELAY = 16;
+
 var canSendWebsocket = true;
 var buffer;
 
@@ -65,4 +69,41 @@ function sendStream(value) {
     } else {
         buffer = value;
     }
+}
+
+function addStreamEvent(element, stream_name) {
+    element.addEventListener("input", (event) => {
+        if (!sentStreamEvent) {
+            console.log("starting stream event: " + stream_name);
+
+            SendJson(new espEvent(OPEN_STREAM, stream_name));
+
+            sentStreamEvent = true;
+        }
+        sendStream(event.target.value);
+    });
+
+    element.addEventListener("change", EndStream);
+}
+
+function sendGetRequest(uri, _onload = null) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", uri, true);
+    xhr.send();
+    if (_onload != null) {
+        xhr.onload = _onload;
+    }
+
+    return xhr;
+}
+
+function sendPostRequest(uri, body) {
+    const xhr = new XMLHttpRequest();
+
+    xhr.open("POST", uri);
+    xhr.setRequestHeader("Content-Type", "application/json");
+
+    xhr.send(JSON.stringify(body));
+
+    return xhr;
 }

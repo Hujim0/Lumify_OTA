@@ -96,7 +96,6 @@
     margin-left: 5vw;
     margin-right: 5vw;
     margin-top: 5rem;
-    /* min-height: 50%; */
     max-width: 90%;
     border-radius: 80px;
     border: solid 4px var(--ink-1);
@@ -105,17 +104,14 @@
 
 .modes-wrapper {
     transform: none !important;
-    max-width: 50% !important;
-    overflow-y: visible !important;
+
+    min-width: 100% !important;
 }
 
 .list {
-    /* align-items: center; */
     margin-left: 1.5rem !important;
     margin-right: 1.5rem !important;
     max-width: 100% !important;
-    /* padding-left: 1.75rem; */
-    /* margin-right: 1rem !important; */
 }
 
 .cross-holder {
@@ -156,7 +152,8 @@
     max-width: 100%;
     display: flex;
     flex-direction: column;
-    overflow-x: hidden;
+    overflow-y: visible;
+    padding-bottom: 10px;
 }
 
 #settings-holder {

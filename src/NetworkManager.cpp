@@ -11,6 +11,8 @@ const IPAddress subnet(255, 255, 255, 0);
 
 const String LOG_PREFIX = "[Network] ";
 
+#define SERIAL_WEBSOCKET ;
+
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
 
@@ -49,6 +51,9 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
         return;
 
     data[len] = 0;
+#ifdef SERIAL_WEBSOCKET
+    Serial.println((char *)data);
+#endif
 
     if (info->len != len)
     {
@@ -95,7 +100,8 @@ void NetworkManager::AddWebPageHandler(const char *uri, ArRequestHandlerFunction
 void NetworkManager::AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func)
 {
     // server.on(uri, HTTP_POST, func, upload, body);
-    server.addHandler(new AsyncCallbackJsonWebHandler(uri, func));
+    AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler(uri, func);
+    server.addHandler(handler);
 }
 
 void NetworkManager::CheckStatus()
