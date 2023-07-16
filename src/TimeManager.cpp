@@ -7,7 +7,16 @@ const String LOG_PREFIX = "[TimeManager] ";
 
 TimeManager *TimeManager::Instance = 0;
 
-void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOfTheWeek)
+void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> &preferences)
+{
+
+    preferences["last_epoch"] = epoch_time_seconds;
+    preferences["last_day_of_the_week"] = _dayOfTheWeek;
+
+    Setup(epoch_time_seconds, _dayOfTheWeek);
+}
+
+void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 {
     if (isSetuped)
     {
@@ -16,8 +25,6 @@ void TimeManager::Setup(ModeHandler *handler, int epoch_time_seconds, int _dayOf
     }
 
     Instance = this;
-
-    modeHandler = handler;
 
     dayOfTheWeek = _dayOfTheWeek;
 
@@ -70,7 +77,7 @@ void TimeManager::UpdateMinutes()
 
     for (int i = 0; i < timeEvents.size(); i++)
     {
-        bool result = timeEvents[i].CheckTime(modeHandler, epoch_time_day_seconds /*, dayOfTheWeek*/);
+        bool result = timeEvents[i].CheckTime(epoch_time_day_seconds /*, dayOfTheWeek*/);
 
         if (!result)
             continue;
@@ -94,18 +101,6 @@ void TimeManager::UpdateSeconds()
     seconds = timeSecs;
 
     UpdateMinutes();
-
-    // // time events (second update)
-
-    // OneMinuteCounter++;
-
-    // if (OneMinuteCounter == 5)
-    // {
-    //     OneMinuteCounter = 0;
-
-    // }
-
-    // sprintln(String(epoch_time_day_seconds) + " " + GetCurrentFormattedTime());
 }
 
 String TimeManager::GetCurrentFormattedTime()
@@ -158,28 +153,49 @@ void TimeManager::AddTimeEvent(TimeEvent event)
     sprintln(LOG_PREFIX + "Added " + event.stringify());
 }
 
-void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
+void TimeManager::CleanTimeEvents()
 {
-    int delete_index = -1;
-
-    for (int i = 0; i < timeEvents.size(); i++)
-    {
-        if (timeEvents[i].Equals(epoch_time, event_type))
-        {
-            delete_index = i;
-        }
-    }
-
-    if (delete_index == -1)
-    {
-        sprintln(LOG_PREFIX + "Delete error: timeEvent not found at " + FormatTime(epoch_time) + ", type: " + String(event_type));
-        return;
-    }
-
-    timeEvents.remove(delete_index);
+    timeEvents.clear();
+    sprintln(LOG_PREFIX + "Cleared list");
 }
 
-void TimeManager::RemoveLastTimeEvent()
+// void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
+// {
+//     int delete_index = -1;
+
+//     for (int i = 0; i < timeEvents.size(); i++)
+//     {
+//         if (timeEvents[i].Equals(epoch_time, event_type))
+//         {
+//             delete_index = i;
+//         }
+//     }
+
+//     if (delete_index == -1)
+//     {
+//         sprintln(LOG_PREFIX + "Delete error: timeEvent not found at " + FormatTime(epoch_time) + ", type: " + String(event_type));
+//         return;
+//     }
+
+//     timeEvents.remove(delete_index);
+// }
+
+// void TimeManager::RemoveLastTimeEvent()
+// {
+//     timeEvents.remove(timeEvents.size() - 1);
+// }
+
+void TimeManager::setOnEventFiredEvent(OnEventFired handler)
 {
-    timeEvents.remove(timeEvents.size() - 1);
+    onEventFired = handler;
+}
+void TimeManager::InvokeOnEventFired(float transition, EventType eventType, int value, String args)
+{
+    if (onEventFired != NULL)
+        onEventFired(transition, eventType, value, args);
+}
+
+int TimeManager::GetEpochTime()
+{
+    return epoch_time_day_seconds;
 }

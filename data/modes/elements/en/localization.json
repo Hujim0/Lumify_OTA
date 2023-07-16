@@ -1,0 +1,7 @@
+{
+    "mode": "Mode - ",
+    "brightness": "Brightness value - ",
+    "mode_list": ["Static mode", "Rainbow mode", "Wave mode", "Sky mode"],
+    "true": "Yes",
+    "false": "No"
+}

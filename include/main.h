@@ -3,6 +3,8 @@
 
 #define NUMPIXELS 300
 
+#include <TimeEvent.h>
+
 #define STRIP WS2812B
 #define STRIP_PIN D4
 #define COLOR_ORDER GRB
@@ -13,9 +15,10 @@ void OnWebSocketMessage(String);
 void ApplyPreferences(String);
 void ChangeLanguage(String);
 void SetupFastLED();
-void fiveSecondTimer();
+void minuteSecondTimer();
 void ConnectToWifi();
 void LoadTimeEvents();
 void TryReconnect();
+void onTimeEventFired(float, EventType eventType, int value, String args);
 
 #endif

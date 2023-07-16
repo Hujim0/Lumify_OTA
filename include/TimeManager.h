@@ -7,17 +7,17 @@
 #include <ESP_LinkedList.h>
 
 typedef std::function<void()> OneMinuteTimer;
+typedef std::function<void(float, EventType, int, String)> OnEventFired;
 
 class TimeManager
 {
 private:
-    ModeHandler *modeHandler;
-
     int epoch_time_day_seconds = 0;
     unsigned long MillisOffset = 0UL;
     int dayOfTheWeek = 0;
     ESP_LinkedList<TimeEvent> timeEvents;
     int timeEventsCounter = 0;
+    OnEventFired onEventFired;
 
     // int OneMinuteCounter = 0;
     bool isSetuped = false;
@@ -30,16 +30,19 @@ private:
     void UpdateHours();
 
 public:
-    void Setup(ModeHandler *, int epoch_time_day_seconds, int dayOfTheWeek);
+    void setOnEventFiredEvent(OnEventFired);
+    void InvokeOnEventFired(float, EventType, int, String);
+    void Setup(int epoch_time_day_seconds, int dayOfTheWeek);
+    void Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> &preferences);
     void Update();
     String GetCurrentFormattedTime();
+    int GetEpochTime();
     static String FormatTime(int);
 
     OneMinuteTimer timer;
 
     void AddTimeEvent(TimeEvent handler);
-    void RemoveTimeEvent(int epoch_time, int event_type);
-    void RemoveLastTimeEvent();
+    void CleanTimeEvents();
 
     TimeManager();
 

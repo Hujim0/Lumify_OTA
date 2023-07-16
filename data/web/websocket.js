@@ -76,7 +76,8 @@ function addStreamEvent(element, stream_name) {
         if (!sentStreamEvent) {
             console.log("starting stream event: " + stream_name);
 
-            SendJson(new espEvent(OPEN_STREAM, stream_name));
+            // SendJson(new espEvent(OPEN_STREAM, stream_name));
+            websocket.send(stream_name);
 
             sentStreamEvent = true;
         }
@@ -91,7 +92,9 @@ function sendGetRequest(uri, _onload = null) {
     xhr.open("GET", uri, true);
     xhr.send();
     if (_onload != null) {
-        xhr.onload = _onload;
+        xhr.onload = () => {
+            _onload(xhr.status, xhr.responseText);
+        };
     }
 
     return xhr;
@@ -103,7 +106,7 @@ function sendPostRequest(uri, body) {
     xhr.open("POST", uri);
     xhr.setRequestHeader("Content-Type", "application/json");
 
-    xhr.send(JSON.stringify(body));
+    xhr.send(body);
 
     return xhr;
 }

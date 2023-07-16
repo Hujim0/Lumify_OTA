@@ -9,7 +9,9 @@ window.addEventListener(ON_GET_PREFERENCES_EVENT, (event) => {
 
     brightness_slider.addEventListener("change", (event) => {
         // SendJson(new espEvent(BRIGHTNESS, event.target.value));
-        sendGetRequest("/brightness?value=" + String(event.target.value));
+        sendGetRequest(
+            "/brightness?value=" + String(event.target.value) + "&save"
+        );
     });
 });
 

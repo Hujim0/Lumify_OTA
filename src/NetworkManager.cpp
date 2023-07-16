@@ -181,6 +181,7 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
     // websocket setup
 
     server.addHandler(&webSocket);
+    server.addHandler(&events);
     webSocket.onEvent(onNewEvent);
     webSocket.closeAll();
     // print server url
@@ -213,37 +214,7 @@ void NetworkManager::loop()
     MDNS.update();
 }
 
-void NetworkManager::ConfigureTZ(ESPAsync_WiFiManager &manager)
+void NetworkManager::SendEvent(const char *event_name, const char *msg)
 {
-
-    String tempTZ = manager.getTimezoneName();
-
-    // if (strlen(tempTZ.c_str()) < sizeof(WM_config.TZ_Name) - 1)
-    //     strcpy(WM_config.TZ_Name, tempTZ.c_str());
-    // else
-    //     strncpy(WM_config.TZ_Name, tempTZ.c_str(), sizeof(WM_config.TZ_Name) - 1);
-
-    const char *TZ_Result = manager.getTZ(tempTZ);
-
-    // if (strlen(TZ_Result) < sizeof(WM_config.TZ) - 1)
-    //     strcpy(WM_config.TZ, TZ_Result);
-    // else
-    //     strncpy(WM_config.TZ, TZ_Result, sizeof(WM_config.TZ_Name) - 1);
-
-    // if (strlen(WM_config.TZ_Name) > 0)
-    // {
-    //     sprintln("Saving current TZ_Name =" + WM_config.TZ_Name + ", TZ = " + WM_config.TZ);
-    // }
-
-    configTime(TZ_Result, "pool.ntp.org");
-
-    static time_t now;
-
-    now = time(nullptr);
-
-    if (now > 1451602800)
-    {
-        Serial.print("Local Date/Time: ");
-        Serial.print(ctime(&now));
-    }
+    events.send(msg, event_name);
 }

@@ -3,5 +3,7 @@
     "brightness": 15,
     "mode": 0,
     "lang": "en",
-    "debug": true
+    "debug": true,
+    "last_epoch": 0,
+    "last_day_of_the_week": 0
 }

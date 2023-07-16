@@ -9,12 +9,14 @@
 
 #define STATIC_DOCUMENT_MEMORY_SIZE 512
 
-void GetWifiSettings(String *);
+void GetWifiSettings(String *data_write_to);
 String LoadPreferences();
-void SavePreferences(String);
-void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *);
-String GetModeArgs(int);
-void SaveModeArgs(int, String);
+void SavePreferences(String json_string);
+void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *json);
+void SaveTimeEvents(String json_string);
+String GetModeArgs(int id);
+String GetModeArgsDefault(int id);
+void SaveModeArgs(int id, String args_string);
 void FSBegin();
 String GetTimeEvents();
 // void Save

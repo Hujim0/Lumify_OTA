@@ -37,55 +37,6 @@
     transform: translate(1px, 0px);
 }
 
-.timelist-element {
-    margin: 1rem;
-    background-color: var(--ink-grey);
-    height: 1.5rem;
-    border-radius: 1rem;
-    display: grid;
-    grid-template-columns: 5fr 1fr 5fr;
-    align-items: start;
-    justify-content: start;
-    padding: 0.5rem;
-    padding-right: 1rem;
-    /* width: flex; */
-    flex-direction: row;
-    overflow: hidden;
-}
-
-.timelist-element > label {
-    grid-column: 1;
-    margin-left: 1rem;
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.timelist-element > div {
-    grid-column: 3;
-    /* columns: 2; */
-    justify-self: end;
-    /* justify-self: flex-start; */
-    margin-left: 2rem;
-    /* margin-bottom: 3px; */
-    height: 3rem;
-    min-height: 3rem;
-}
-
-.timelist-element i {
-    text-align: center;
-    padding-top: 0.25rem;
-    width: 1.5rem;
-    height: 1.25rem;
-    /* margin-bottom: 3px; */
-    border-radius: 100%;
-    color: var(--text-color);
-}
-
-.timelist-element i:hover {
-    background-color: var(--ink-2-grey);
-    transition: all 0.1s;
-}
-
 .full-screen > div {
     padding-top: 0.5rem;
     padding-bottom: 2rem;
@@ -158,4 +109,110 @@
 
 #settings-holder {
     min-width: 100%;
+}
+
+.full-screen {
+    opacity: 1;
+    pointer-events: all;
+    transition: all 0.2s ease-in-out;
+    overflow-y: auto;
+}
+.full-screen > div {
+    transition: all 0.2s ease-in-out;
+    display: block;
+}
+
+.full-screen:not(.active) {
+    opacity: 0;
+    pointer-events: none;
+}
+.full-screen:not(.active) > div {
+    transform: translateY(60vh);
+}
+
+.list.time-events > div {
+    grid-template-columns: 3fr 0.2fr 0.2fr 0.5fr !important;
+    align-items: center;
+}
+.list.time-events > div > button {
+    justify-self: center;
+    background-color: transparent;
+    margin-right: 1rem;
+    border: none;
+    width: 1.75rem;
+    min-height: 1.75rem;
+    padding-top: 3px;
+    border-radius: 100%;
+
+    transition: all 0.1s ease-in-out;
+}
+
+.list.time-events > div > .edit-button {
+    grid-column: 2;
+    color: var(--text-color);
+
+    transition: all 0.1s ease-in-out;
+}
+.list.time-events > div > .trash-button {
+    grid-column: 3;
+    grid-row: 1;
+    color: rgb(199, 6, 6);
+    background-color: rgba(139, 0, 0, 0.188);
+
+    transition: all 0.1s ease-in-out;
+}
+.list.time-events > div > .trash-button:hover {
+    background-color: rgba(188, 3, 3, 0.666) !important;
+
+    transition: all 0.1s ease-in-out;
+}
+.list.time-events > div > button > i {
+    font-size: 20px;
+}
+
+.list.time-events > div > button:hover {
+    color: var(--ink-0) !important;
+    background-color: var(--ink-5);
+}
+
+.list.time-events > div > .info-button {
+    grid-column: 4 !important;
+}
+
+.list.time-events > div > label:first-child {
+    font-size: 27px;
+}
+
+.list.time-events > div > .info-button + label {
+    grid-column: 1/5 !important;
+}
+
+@media screen and (max-width: 500px) {
+    .list > div > input,
+    select {
+        max-width: 22.5vw !important;
+    }
+
+    .list > div {
+        grid-template-columns: 1fr 2fr 1fr !important;
+        column-gap: 7px !important;
+        overflow-x: hidden !important;
+        padding-right: 5px !important;
+        padding-left: 10px !important;
+    }
+    .list > div > label:first-child {
+        margin-left: 10px !important;
+    }
+
+    .full-screen > div {
+        margin-right: 2.5vw !important;
+        margin-left: 2.5vw !important;
+        min-width: 95% !important;
+    }
+
+    .list {
+        margin-left: 1rem !important;
+        margin-right: 1rem !important;
+        max-width: 100% !important;
+    }
 }

@@ -99,3 +99,23 @@ String GetTimeEvents()
     file.close();
     return data;
 }
+
+void SaveTimeEvents(String data)
+{
+    File file = LittleFS.open("/time_events.json", "w");
+    file.write(data.c_str());
+    file.close();
+}
+
+String GetModeArgsDefault(int id)
+{
+    String path = "/modes/default/mode" + String(id) + ".json";
+
+    if (!LittleFS.exists(path))
+        return "";
+
+    File file = LittleFS.open(path, "r");
+    String data = file.readString();
+    file.close();
+    return data;
+}

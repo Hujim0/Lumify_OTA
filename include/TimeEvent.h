@@ -2,7 +2,6 @@
 #define TIMEEVENT_H
 
 #include <Arduino.h>
-#include <ModeHandler.h>
 
 enum EventType
 {
@@ -13,22 +12,21 @@ enum EventType
 class TimeEvent
 {
 public:
-    bool CheckTime(ModeHandler *, int /*, int*/);
+    bool CheckTime(int /*, int*/);
 
-    bool Equals(int, int);
-    bool Equals(int, EventType);
+    bool Equals(int epoch, int event_Type);
+    bool Equals(int epoch, EventType eventType);
     int epochTime;
     // bool *daysOfTheWeek;
 
-    int id = 0;
-
     EventType eventType;
     int value;
-    const char *args;
+    float transition;
+    String args;
 
     String stringify();
 
-    TimeEvent(int, /*bool, */ EventType, int, String);
+    TimeEvent(int epoch, float transition, EventType type, int value, String args);
     TimeEvent();
 };
 

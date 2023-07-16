@@ -58,6 +58,10 @@
         "variant": "cpp"
     },
     "cSpell.words": [
+        "CRGB",
+        "dayoftheweek",
+        "elems",
+        "leds",
         "lumify",
         "MDNS",
         "sprintln"

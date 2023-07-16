@@ -16,7 +16,7 @@
     outline: solid 4px var(--ink-3);
 }
 
-.list > div .info-button {
+.info-button {
     padding-top: 6px;
     padding-right: 16px;
     grid-row: 1;
@@ -34,22 +34,22 @@
     transition: all 0.1s ease-in-out;
 }
 
-.list > div .info-button > input {
+.info-button > input {
     display: none;
 }
 
-.list > div .info-button > input:checked + i {
+.info-button > input:checked + i {
     color: var(--nice-red);
     filter: drop-shadow(4px 4px 8px 0px rgba(0, 0, 0, 0.2));
     transition: all 0.1s ease-in-out;
 }
 
-.list > div .info-button:hover {
+.info-button:hover {
     color: var(--ink-0);
     background-color: var(--ink-5);
 }
 
-.list > div .info-button + label {
+.info-button + label {
     padding-left: 1rem;
     padding-right: 1rem;
     padding-top: 0.5rem;
@@ -57,19 +57,22 @@
     grid-column: 1/4;
     transition: all 0.1s linear;
     overflow: hidden;
+
+    white-space: pre-line;
 }
 
-.list > div .info-button + label::after {
+.info-button + label::after {
     content: "\A  ";
     white-space: pre;
 }
 
-.list > div .info-button + .active {
+.info-button + .active {
     max-height: 3rem;
     transition: all 0.1s linear;
 }
 
-.list > div > input {
+.list > div > input,
+select {
     justify-self: end;
 }
 
@@ -219,10 +222,7 @@
     justify-items: center;
     grid-template-columns: 1fr 1fr;
     height: 50px;
-
     padding-top: 3rem;
-    margin-left: 9vw;
-    margin-right: 9vw;
-    width: 90%;
-    column-gap: 10%;
+
+    width: 100%;
 }

@@ -13,14 +13,14 @@ void ModeHandler::LightSwitch(bool state)
 
     if (!state)
     {
-        last_brigthness = FastLED.getBrightness();
+        last_brightness = FastLED.getBrightness();
 
         FastLED.clearData();
         FastLED.setBrightness(0);
         return;
     }
 
-    FastLED.setBrightness(last_brigthness);
+    FastLED.setBrightness(last_brightness);
 }
 
 void ModeHandler::ChangeMode(int id, const char *args)
@@ -45,34 +45,8 @@ void ModeHandler::ChangeMode(int id, const char *args)
         return;
 
     default:
-        ChangeMode(0);
+        ChangeMode(0, GetModeArgsDefault(0).c_str());
         return;
-    }
-}
-void ModeHandler::ChangeMode(int id)
-{
-    FastLED.clearData();
-
-    current_mode_id = id;
-
-    switch (id)
-    {
-    case 0:
-        current_mode = new StaticMode();
-        return;
-    case 1:
-        current_mode = new RainbowMode();
-        return;
-    case 2:
-        current_mode = new WaveMode();
-        return;
-    case 3:
-        current_mode = new SkyMode();
-        return;
-
-    default:
-        ChangeMode(0);
-        break;
     }
 }
 

@@ -31,6 +31,7 @@ class NetworkManager
 private:
     AsyncWebServer server = AsyncWebServer(PORT);
     AsyncWebSocket webSocket = AsyncWebSocket("/ws");
+    AsyncEventSource events = AsyncEventSource("/events");
     AsyncDNSServer dnsServer;
 
     ESP8266WiFiMulti wifiMulti;
@@ -52,8 +53,8 @@ public:
     void OnNewClient(OnNewClientHandler);
     void OnConnectionLost(OnConnectionLostHandler);
     void TryReconnect();
-    void SentTextToClient(int, const char *);
-    void SentTextToAll(const char *);
+    void SentTextToClient(int client_id, const char *msg);
+    void SentTextToAll(const char *msg);
     void CleanUp();
 
     void AddWebPageHandler(String uri, ArRequestHandlerFunction function);
@@ -62,12 +63,12 @@ public:
 
     void ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_control = (const char *)__null);
     void CheckStatus();
-    void ConfigureTZ(ESPAsync_WiFiManager &);
+    void SendEvent(const char *event_name, const char *msg);
 
     static NetworkManager *Instance;
     String getUrl();
 
-    bool Begin(const char *, const char *);
+    bool Begin(const char *ssid, const char *pw);
     void loop();
 };
 

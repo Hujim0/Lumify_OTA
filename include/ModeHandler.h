@@ -17,7 +17,7 @@ class ModeHandler
 private:
     Mode *current_mode = NULL;
 
-    uint8_t last_brigthness = 0;
+    uint8_t last_brightness = 0;
 
 public:
     int current_mode_id;
@@ -25,7 +25,6 @@ public:
     void LightSwitch(bool);
     void ChangeBrightness(int);
     void ChangeMode(int, const char *);
-    void ChangeMode(int);
     void UpdateArgs(const char *);
     void PushArg(String, String);
     void update(CRGB *);
