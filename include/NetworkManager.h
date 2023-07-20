@@ -16,42 +16,57 @@
 #include <ESPAsyncDNSServer.h>
 #include <ESP8266WiFiMulti.h>
 
-#define PORT 80
+#define DEFAULT_PORT 80
 
-#define ATTEMPT_DURATION 30000
+const String LOG_PREFIX = "[Network] ";
+
+#define ATTEMPT_DURATION 5000
 
 #define DEBUG_WIFI_SETTINGS
 
 typedef std::function<void(String)> OnNewMessageHandler;
 typedef std::function<void(int)> OnNewClientHandler;
 typedef std::function<void()> OnConnectionLostHandler;
+typedef std::function<void()> OnConnectionSuccessfulHandler;
+typedef std::function<void(const char *ssid, const char *pw)> OnNewCredentialsHandler;
+
+const IPAddress ip(192, 168, 0, 146);
+const IPAddress gateway(192, 168, 0, 146);
+const IPAddress subnet(255, 255, 255, 0);
 
 class NetworkManager
 {
 private:
-    AsyncWebServer server = AsyncWebServer(PORT);
-    AsyncWebSocket webSocket = AsyncWebSocket("/ws");
-    AsyncEventSource events = AsyncEventSource("/events");
-    AsyncDNSServer dnsServer;
-
-    ESP8266WiFiMulti wifiMulti;
+    OnNewMessageHandler onNewMessageHandler = NULL;
+    OnConnectionLostHandler onConnectionLostHandler = NULL;
+    OnConnectionSuccessfulHandler onConnectionSuccessfulHandler = NULL;
+    OnNewCredentialsHandler onNewCredentialsHandler = NULL;
 
     String buffer;
     uint64_t buffer_size;
 
     String url;
-    String stringPort;
 
 public:
+    OnNewClientHandler onNewClientHandler = NULL;
+
+    AsyncWebServer _server = AsyncWebServer(DEFAULT_PORT);
+    AsyncWebSocket _webSocket = AsyncWebSocket("/ws");
+    AsyncEventSource _events = AsyncEventSource("/events");
+    AsyncDNSServer _dnsServer;
+
+    String stringPort;
+
+    uint16_t NetworkPort = DEFAULT_PORT;
+
     void handleWebSocketMessage(void *, uint8_t *, size_t);
 
-    OnNewMessageHandler onNewMessageHandler = nullptr;
-    OnNewClientHandler onNewClientHandler = nullptr;
-    OnConnectionLostHandler onConnectionLostHandler = nullptr;
-
+    void ResetServers(int port);
     void OnNewMessage(OnNewMessageHandler);
     void OnNewClient(OnNewClientHandler);
     void OnConnectionLost(OnConnectionLostHandler);
+    void OnConnectionSuccessful(OnConnectionSuccessfulHandler);
+    void OnNewCredentials(OnNewCredentialsHandler);
     void TryReconnect();
     void SentTextToClient(int client_id, const char *msg);
     void SentTextToAll(const char *msg);
@@ -68,8 +83,10 @@ public:
     static NetworkManager *Instance;
     String getUrl();
 
-    bool Begin(const char *ssid, const char *pw);
+    bool BeginSTA(const char *ssid, const char *pw);
     void loop();
+
+    NetworkManager();
 };
 
 #endif

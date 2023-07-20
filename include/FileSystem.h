@@ -9,7 +9,8 @@
 
 #define STATIC_DOCUMENT_MEMORY_SIZE 512
 
-void GetWifiSettings(String *data_write_to);
+void GetWifiCredentials(String *data_write_to);
+void SaveWifiCredentials(const char *ssid, const char *pw);
 String LoadPreferences();
 void SavePreferences(String json_string);
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *json);

@@ -37,6 +37,9 @@ void Log::Begin()
         currentFileNumber += 1;
 
     sprintln("[DEBUG] Log File: " + GetFileName(currentFileNumber));
+    sprintln("[DEBUG] Reload cause: " +
+             ESP.getResetReason() + " " +
+             ESP.getResetInfo());
 #endif
 }
 

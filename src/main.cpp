@@ -19,6 +19,9 @@
 #include <FileSystem.h>
 #include <TimeManager.h>
 #include <global.h>
+#include <NetworkAP.h>
+
+#include <CaptiveRequestHandler.h>
 
 #include <ArduinoJson.h>
 
@@ -28,8 +31,10 @@ Log _log = Log();
 
 ModeHandler modeHandler;
 NetworkManager network = NetworkManager();
+NetworkAP network_ap = NetworkAP();
 TimeManager timeManager;
 String currentLanguage = "en";
+CaptiveRequestHandler captive = CaptiveRequestHandler();
 
 void setup()
 {
@@ -46,7 +51,8 @@ void setup()
   ApplyPreferences(LoadPreferences());
 
   ConnectToWifi();
-  AddServerHandlers();
+
+  sprintln("hi");
 
   SetupFastLED();
 
@@ -72,24 +78,62 @@ void loop()
   timeManager.Update();
 
   network.loop();
+
+  if (network_ap.isActive)
+  {
+    network_ap.update();
+  }
 }
 
 void ConnectToWifi()
 {
-  String wifi_data[2];
-  GetWifiSettings(wifi_data);
+  sprintln(line);
 
-  while (!network.Begin(wifi_data[0].c_str(), wifi_data[1].c_str()))
+  String wifi_data[2];
+  GetWifiCredentials(wifi_data);
+
+  if (wifi_data[0] != NULL && wifi_data[0] != "")
   {
-    // try again
+    if (network.BeginSTA(wifi_data[0].c_str(), wifi_data[1].c_str()))
+    {
+      AddServerHandlers();
+      return;
+    }
+    else
+      sprintln(LOG_PREFIX + "Failed to connect! Falling back to AP...");
   }
+  else
+    sprintln(LOG_PREFIX + "Credentials not found! Starting AP...");
+
+  SetupCaptivePortal();
+
+  network.OnNewCredentials(NewCredentials);
+}
+
+void NewCredentials(const char *ssid, const char *pw)
+{
+  SaveWifiCredentials(ssid, pw);
+  network_ap.CloseCaptivePortal();
+  network._server.removeHandler(new CaptiveRequestHandler());
+  AddServerHandlers();
+}
+
+void SetupCaptivePortal()
+{
+  if (!network_ap.StartCaptivePortal("Lumify configuration"))
+    return;
+
+  network._server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+
+  network.ServeStatic("/data", LittleFS, "/", "max-age=600");
+
+  network._server.begin();
 }
 
 void TryReconnect()
 {
-  sprintln("[ERROR] Lost connection!!!");
-
-  network.TryReconnect();
+  if (WiFi.getMode() != WiFiMode_t::WIFI_AP)
+    network.TryReconnect();
 }
 
 void AddServerHandlers()
@@ -98,12 +142,7 @@ void AddServerHandlers()
   network.OnNewMessage(OnWebSocketMessage);
   network.OnConnectionLost(TryReconnect);
 
-  network.ServeStatic("/data", LittleFS, "/", "max-age=600");
-
   // // global
-  // network.AddWebPageHandler("http://local_lumify/", [](AsyncWebServerRequest *request)
-  //                           { request->redirect(network.getUrl() + currentLanguage + "/home"); });
-
   network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
                             { request->redirect("/" + currentLanguage + "/home"); });
   network.AddWebPageHandler("/favicon.ico", [](AsyncWebServerRequest *request)

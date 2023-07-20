@@ -5,13 +5,9 @@
 #include <AsyncElegantOTA.h>
 #include <ESPAsync_WiFiManager.h>
 
-const IPAddress ip(192, 168, 0, 146);
-const IPAddress gateway(192, 168, 0, 146);
-const IPAddress subnet(255, 255, 255, 0);
+#define SERIAL_WEBSOCKET
 
-const String LOG_PREFIX = "[Network] ";
-
-#define SERIAL_WEBSOCKET ;
+const int MAX_ATTEMPT_COUNT = 3;
 
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
@@ -80,28 +76,28 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
 
 void NetworkManager::SentTextToClient(int id, const char *data)
 {
-    webSocket.text(id, data);
+    _webSocket.text(id, data);
 }
 void NetworkManager::SentTextToAll(const char *data)
 {
     sprintln("[Websocket] Texted to all: " + String(data));
-    webSocket.textAll(data);
+    _webSocket.textAll(data);
 }
 
 void NetworkManager::AddWebPageHandler(String uri, ArRequestHandlerFunction func)
 {
-    server.on(uri.c_str(), HTTP_GET, func);
+    _server.on(uri.c_str(), HTTP_GET, func);
 }
 void NetworkManager::AddWebPageHandler(const char *uri, ArRequestHandlerFunction func)
 {
-    server.on(uri, HTTP_GET, func);
+    _server.on(uri, HTTP_GET, func);
 }
 
 void NetworkManager::AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func)
 {
     // server.on(uri, HTTP_POST, func, upload, body);
     AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler(uri, func);
-    server.addHandler(handler);
+    _server.addHandler(handler);
 }
 
 void NetworkManager::CheckStatus()
@@ -127,15 +123,23 @@ void NetworkManager::OnConnectionLost(OnConnectionLostHandler handler)
 {
     onConnectionLostHandler = handler;
 }
+void NetworkManager::OnConnectionSuccessful(OnConnectionSuccessfulHandler handler)
+{
+    onConnectionSuccessfulHandler = handler;
+}
+void NetworkManager::OnNewCredentials(OnNewCredentialsHandler handler)
+{
+    onNewCredentialsHandler = handler;
+}
 
 void NetworkManager::CleanUp()
 {
-    webSocket.cleanupClients();
+    _webSocket.cleanupClients();
 }
 
 void NetworkManager::ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_control)
 {
-    server.serveStatic(uri, fs, path, cache_control);
+    _server.serveStatic(uri, fs, path, cache_control);
 }
 
 String NetworkManager::getUrl()
@@ -145,47 +149,67 @@ String NetworkManager::getUrl()
 
 void NetworkManager::TryReconnect()
 {
-    WiFi.reconnect();
+    if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
+        return;
+    if (WiFi.reconnect())
+    {
+        sprintln(LOG_PREFIX + "Success!");
+    }
+    else
+    {
+        sprintln(LOG_PREFIX + "Cant reconnect!");
+    }
 }
-bool NetworkManager::Begin(const char *ssid, const char *pw)
+bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 {
-    Instance = this;
 
-    stringPort = ":" + String(PORT);
-
-    if (PORT == 80)
-        stringPort = "";
-
-    WiFi.begin(ssid, pw);
-    WiFi.mode(WiFiMode_t::WIFI_STA);
-    WiFi.setAutoReconnect(true);
+    if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
+    {
+        WiFi.mode(WiFiMode_t::WIFI_AP_STA);
+    }
+    else
+    {
+        WiFi.mode(WiFiMode_t::WIFI_STA);
+    }
 
 #ifdef DEBUG_WIFI_SETTINGS
     sprintln(LOG_PREFIX + "Wifi credentials: " + String(ssid) + " " + String(pw));
-    sprintln(line);
+    // sprintln(line);
 #endif
 
     sprintln(LOG_PREFIX + "Connecting to Wifi...");
 
-    if (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
+    int attempt = 0;
+    WiFi.begin(ssid, pw);
+    while (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
     {
-        return false;
+        WiFi.begin(ssid, pw);
+
+        attempt += 1;
+
+        sprintln(LOG_PREFIX + "Attempt " + String(attempt) + "...");
+
+        if (attempt > MAX_ATTEMPT_COUNT)
+        {
+            sprintln("[ERROR] Cant connect!");
+
+            return false;
+        }
     }
 
     sprintln(LOG_PREFIX + "success");
     // server setup
 
-    server.begin();
-    AsyncElegantOTA.begin(&server, "admin", "admin");
+    _server.begin();
+    AsyncElegantOTA.begin(&_server, "admin", "admin");
 
     // websocket setup
 
-    server.addHandler(&webSocket);
-    server.addHandler(&events);
-    webSocket.onEvent(onNewEvent);
-    webSocket.closeAll();
+    _server.addHandler(&_webSocket);
+    _server.addHandler(&_events);
+    _webSocket.onEvent(onNewEvent);
+    _webSocket.closeAll();
     // print server url
-    WiFi.config(ip, gateway, subnet);
     url = "http://" + WiFi.localIP().toString() + stringPort;
 
     sprintln(LOG_PREFIX + "HTTP server started at \"" + url + "\"");
@@ -197,14 +221,21 @@ bool NetworkManager::Begin(const char *ssid, const char *pw)
     }
 
     sprintln(LOG_PREFIX + "mDNS responder started: \"http://" + String(DNS_SERVER_URL) + ".local" + stringPort + "\"");
-    MDNS.addService("http", "tcp", PORT);
+    MDNS.addService("http", "tcp", NetworkPort);
 
     sprintln(line);
 
-    ESPAsync_WiFiManager wifiManager(&server, &dnsServer, DNS_SERVER_URL);
+    // ConfigureTZ(wifiManager);
+
+    ESPAsync_WiFiManager wifiManager(&_server, &_dnsServer, DNS_SERVER_URL);
     wifiManager.setMinimumSignalQuality(-1);
 
-    // ConfigureTZ(wifiManager);
+    WiFi.enableAP(false);
+
+    if (onConnectionSuccessfulHandler != NULL)
+        onConnectionSuccessfulHandler();
+    if (onNewCredentialsHandler != NULL)
+        onNewCredentialsHandler(ssid, pw);
 
     return true;
 }
@@ -216,5 +247,26 @@ void NetworkManager::loop()
 
 void NetworkManager::SendEvent(const char *event_name, const char *msg)
 {
-    events.send(msg, event_name);
+    _events.send(msg, event_name);
+}
+
+void NetworkManager::ResetServers(int port)
+{
+    _server.end();
+    _server = AsyncWebServer(port);
+    NetworkPort = port;
+}
+
+NetworkManager::NetworkManager()
+{
+    Instance = this;
+
+    WiFi.config(ip, gateway, subnet);
+
+    stringPort = ":" + String(NetworkPort);
+
+    if (NetworkPort == 80)
+        stringPort = "";
+
+    WiFi.setAutoReconnect(true);
 }

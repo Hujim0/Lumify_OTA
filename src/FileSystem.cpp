@@ -5,7 +5,7 @@ void FSBegin()
     LittleFS.begin();
 }
 
-void GetWifiSettings(String *data)
+void GetWifiCredentials(String *data)
 {
     File file = LittleFS.open(WIFI_SETTINGS_PATH, "r");
 
@@ -14,6 +14,15 @@ void GetWifiSettings(String *data)
 
     data[0].trim();
     data[1].trim();
+
+    file.close();
+}
+
+void SaveWifiCredentials(const char *ssid, const char *pw)
+{
+    File file = LittleFS.open(WIFI_SETTINGS_PATH, "w");
+    file.write(String(String(ssid) + "\n").c_str());
+    file.write(pw);
 
     file.close();
 }
