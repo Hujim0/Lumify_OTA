@@ -7,9 +7,13 @@ bool NetworkAP::StartCaptivePortal(const char *ssid)
 {
     WiFi.mode(WiFiMode_t::WIFI_AP);
 
-    WiFi.softAP(ssid);
-
     WiFi.softAPConfig(ip, gateway, subnet);
+
+    WiFi.softAP(ssid);
+    // WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected &event)
+    //                                   { sprintln("Connected to the AP: " + String(event.aid)); });
+
+    dnsServer.setTTL(60 * 60 * 1000);
 
     dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 
@@ -23,11 +27,19 @@ bool NetworkAP::StartCaptivePortal(const char *ssid)
 
     isActive = true;
 
+    // WiFi.softAPgetStationNum();
+
+    WiFi.setOutputPower(10.0F);
+
+    // WiFi.`
+
     return true;
 }
 
 void NetworkAP::update()
 {
+    ESP.wdtFeed();
+
     dnsServer.processNextRequest();
 }
 

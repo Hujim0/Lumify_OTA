@@ -21,6 +21,7 @@ void LoadTimeEvents();
 void TryReconnect();
 void onTimeEventFired(float, EventType eventType, int value, String args);
 void SetupCaptivePortal();
+void OnConnected();
 void NewCredentials(const char *ssid, const char *pw);
 
 #endif

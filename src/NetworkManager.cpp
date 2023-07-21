@@ -268,5 +268,5 @@ NetworkManager::NetworkManager()
     if (NetworkPort == 80)
         stringPort = "";
 
-    WiFi.setAutoReconnect(true);
+    // WiFi.setAutoReconnect(true);
 }

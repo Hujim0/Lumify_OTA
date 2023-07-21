@@ -29,6 +29,8 @@ private:
     int hours;
     void UpdateHours();
 
+    
+
 public:
     void setOnEventFiredEvent(OnEventFired);
     void InvokeOnEventFired(float, EventType, int, String);

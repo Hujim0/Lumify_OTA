@@ -40,6 +40,8 @@ void setup()
 {
   delay(INITIAL_DELAY);
 
+  ESP.wdtDisable();
+
   Serial.begin(115200);
 
   FSBegin();
@@ -49,22 +51,26 @@ void setup()
   sprintln("[ESP] loaded");
 
   ApplyPreferences(LoadPreferences());
+  SetupFastLED();
+
+  network.OnConnectionSuccessful(OnConnected);
 
   ConnectToWifi();
 
-  sprintln("hi");
+  LoadTimeEvents();
+}
 
-  SetupFastLED();
+void OnConnected()
+{
+  AddServerHandlers();
 
-  timeManager.timer = minuteSecondTimer;
+  sprintln("hui");
 
   modeHandler.ChangeMode(
       modeHandler.current_mode_id,
       GetModeArgs(modeHandler.current_mode_id).c_str());
 
-  LoadTimeEvents();
-
-  // timeManager.AddTimeEvent(TimeEvent(72180 /*, days*/, Brightness, 255, ""));
+  timeManager.timer = minuteSecondTimer;
 }
 
 void loop()
@@ -77,11 +83,13 @@ void loop()
 
   timeManager.Update();
 
-  network.loop();
-
   if (network_ap.isActive)
   {
     network_ap.update();
+  }
+  else
+  {
+    network.loop();
   }
 }
 
@@ -94,12 +102,7 @@ void ConnectToWifi()
 
   if (wifi_data[0] != NULL && wifi_data[0] != "")
   {
-    if (network.BeginSTA(wifi_data[0].c_str(), wifi_data[1].c_str()))
-    {
-      AddServerHandlers();
-      return;
-    }
-    else
+    if (!network.BeginSTA(wifi_data[0].c_str(), wifi_data[1].c_str()))
       sprintln(LOG_PREFIX + "Failed to connect! Falling back to AP...");
   }
   else
@@ -116,6 +119,8 @@ void NewCredentials(const char *ssid, const char *pw)
   network_ap.CloseCaptivePortal();
   network._server.removeHandler(new CaptiveRequestHandler());
   AddServerHandlers();
+
+  // network.BeginSTA(ssid, pw);
 }
 
 void SetupCaptivePortal()
@@ -124,8 +129,6 @@ void SetupCaptivePortal()
     return;
 
   network._server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
-
-  network.ServeStatic("/data", LittleFS, "/", "max-age=600");
 
   network._server.begin();
 }
@@ -141,6 +144,8 @@ void AddServerHandlers()
   // network.OnNewClient(OnClientConnected);
   network.OnNewMessage(OnWebSocketMessage);
   network.OnConnectionLost(TryReconnect);
+
+  network.ServeStatic("/data", LittleFS, "/", "max-age=600");
 
   // // global
   network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
@@ -345,6 +350,8 @@ void AddServerHandlers()
   network.AddWebPageHandler("/ru/schedule", [](AsyncWebServerRequest *request)
                             { request->send(
                                   request->beginResponse(LittleFS, "web/schedule/schedule_ru.html", "text/html")); });
+
+  network._server.begin();
 }
 
 void ChangeLanguage(String _lang)
