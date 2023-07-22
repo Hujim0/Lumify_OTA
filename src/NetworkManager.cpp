@@ -7,7 +7,7 @@
 
 #define SERIAL_WEBSOCKET
 
-const int MAX_ATTEMPT_COUNT = 3;
+const int MAX_ATTEMPT_COUNT = 10;
 
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
@@ -172,6 +172,8 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         WiFi.mode(WiFiMode_t::WIFI_STA);
     }
 
+    WiFi.config(ip, gateway, subnet);
+
 #ifdef DEBUG_WIFI_SETTINGS
     sprintln(LOG_PREFIX + "Wifi credentials: " + String(ssid) + " " + String(pw));
     // sprintln(line);
@@ -179,23 +181,40 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 
     sprintln(LOG_PREFIX + "Connecting to Wifi...");
 
+    delay(200);
+
     int attempt = 0;
+
     WiFi.begin(ssid, pw);
-    while (WiFi.waitForConnectResult(ATTEMPT_DURATION) != WL_CONNECTED)
+
+    while (WiFi.status() != WL_CONNECTED && attempt >= MAX_ATTEMPT_COUNT)
     {
-        WiFi.begin(ssid, pw);
-
+        sprintln(".");
+        delay(500);
         attempt += 1;
-
-        sprintln(LOG_PREFIX + "Attempt " + String(attempt) + "...");
-
-        if (attempt > MAX_ATTEMPT_COUNT)
-        {
-            sprintln("[ERROR] Cant connect!");
-
-            return false;
-        }
     }
+
+    if (attempt >= MAX_ATTEMPT_COUNT)
+    {
+        sprintln("[ERROR] Cant connect!");
+
+        return false;
+    }
+
+    // do
+    // {
+
+    //     // sprintln(LOG_PREFIX + "Attempt " + String(attempt) + "...");
+
+    //     // delay(1000);
+
+    //     if (attempt >= MAX_ATTEMPT_COUNT)
+    //     {
+    //         sprintln("[ERROR] Cant connect!");
+
+    //         return false;
+    //     }
+    // } while (WiFi.status() != WL_CONNECTED);
 
     sprintln(LOG_PREFIX + "success");
     // server setup

@@ -21,8 +21,6 @@
 #include <global.h>
 #include <NetworkAP.h>
 
-#include <CaptiveRequestHandler.h>
-
 #include <ArduinoJson.h>
 
 CRGB leds[NUMPIXELS];
@@ -34,7 +32,6 @@ NetworkManager network = NetworkManager();
 NetworkAP network_ap = NetworkAP();
 TimeManager timeManager;
 String currentLanguage = "en";
-CaptiveRequestHandler captive = CaptiveRequestHandler();
 
 void setup()
 {
@@ -64,8 +61,6 @@ void OnConnected()
 {
   AddServerHandlers();
 
-  sprintln("hui");
-
   modeHandler.ChangeMode(
       modeHandler.current_mode_id,
       GetModeArgs(modeHandler.current_mode_id).c_str());
@@ -82,6 +77,10 @@ void loop()
   FastLED.show();
 
   timeManager.Update();
+
+  // sprintln("update");
+
+  ESP.wdtFeed();
 
   if (network_ap.isActive)
   {
@@ -104,6 +103,8 @@ void ConnectToWifi()
   {
     if (!network.BeginSTA(wifi_data[0].c_str(), wifi_data[1].c_str()))
       sprintln(LOG_PREFIX + "Failed to connect! Falling back to AP...");
+    else
+      return;
   }
   else
     sprintln(LOG_PREFIX + "Credentials not found! Starting AP...");
@@ -117,7 +118,7 @@ void NewCredentials(const char *ssid, const char *pw)
 {
   SaveWifiCredentials(ssid, pw);
   network_ap.CloseCaptivePortal();
-  network._server.removeHandler(new CaptiveRequestHandler());
+  // network._server.removeHandler(new CaptiveRequestHandler());
   AddServerHandlers();
 
   // network.BeginSTA(ssid, pw);
@@ -125,10 +126,23 @@ void NewCredentials(const char *ssid, const char *pw)
 
 void SetupCaptivePortal()
 {
-  if (!network_ap.StartCaptivePortal("Lumify configuration"))
+  if (!network_ap.StartCaptivePortal("Lumify "))
     return;
 
-  network._server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+  // network._server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
+
+  network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
+                            { if(request->hasArg("ssid")) {
+                                network.BeginSTA(request->arg("ssid").c_str(),
+                                                request->arg("pw").c_str()); 
+                                request->send(200);
+                                return;
+                            }
+                              
+                              request->send(request->beginResponse(
+                                  LittleFS,
+                                  "/web/configure/configure.html",
+                                  "text/html")); });
 
   network._server.begin();
 }

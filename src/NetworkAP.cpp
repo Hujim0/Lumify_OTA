@@ -9,38 +9,24 @@ bool NetworkAP::StartCaptivePortal(const char *ssid)
 
     WiFi.softAPConfig(ip, gateway, subnet);
 
-    WiFi.softAP(ssid);
-    // WiFi.onSoftAPModeStationConnected([](const WiFiEventSoftAPModeStationConnected &event)
-    //                                   { sprintln("Connected to the AP: " + String(event.aid)); });
+    WiFi.softAP(String(ssid) + "http://" + ip.toString(), "", 1, 0, 16, 100);
 
-    dnsServer.setTTL(60 * 60 * 1000);
-
-    dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-
-    if (!dnsServer.start(CAPTIVE_PORTAL_PORT, "*", ip))
-    {
-        sprintln(LOG_PREFIX + "Error setting up Captive Portal!");
-        return false;
-    }
-
-    sprintln(LOG_PREFIX + "Captive Portal started!");
-
-    isActive = true;
+    sprintln(LOG_PREFIX + "AP started!");
 
     // WiFi.softAPgetStationNum();
 
     WiFi.setOutputPower(10.0F);
 
-    // WiFi.`
+    isActive = true;
 
     return true;
 }
 
 void NetworkAP::update()
 {
-    ESP.wdtFeed();
+    // ESP.wdtFeed();
 
-    dnsServer.processNextRequest();
+    // dnsServer.processNextRequest();
 }
 
 void NetworkAP::CloseCaptivePortal()
