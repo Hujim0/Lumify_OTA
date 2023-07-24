@@ -3,11 +3,10 @@
 #include <NetworkManager.h>
 
 #include <AsyncElegantOTA.h>
-#include <ESPAsync_WiFiManager.h>
 
 #define SERIAL_WEBSOCKET
 
-const int MAX_ATTEMPT_COUNT = 10;
+const int MAX_ATTEMPT_COUNT = 3;
 
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
@@ -163,16 +162,14 @@ void NetworkManager::TryReconnect()
 bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 {
 
-    if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
-    {
-        WiFi.mode(WiFiMode_t::WIFI_AP_STA);
-    }
-    else
-    {
-        WiFi.mode(WiFiMode_t::WIFI_STA);
-    }
-
-    WiFi.config(ip, gateway, subnet);
+    // if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
+    // {
+    //     WiFi.mode(WiFiMode_t::WIFI_AP_STA);
+    // }
+    // else
+    // {
+    // }
+    WiFi.mode(WiFiMode_t::WIFI_STA);
 
 #ifdef DEBUG_WIFI_SETTINGS
     sprintln(LOG_PREFIX + "Wifi credentials: " + String(ssid) + " " + String(pw));
@@ -181,17 +178,28 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 
     sprintln(LOG_PREFIX + "Connecting to Wifi...");
 
-    delay(200);
+    // WiFi.config(WiFi.localIP(), WiFi.localIP(), subnet);
 
-    int attempt = 0;
+    // delay(500);
 
-    WiFi.begin(ssid, pw);
+    int attempt = 1;
 
-    while (WiFi.status() != WL_CONNECTED && attempt >= MAX_ATTEMPT_COUNT)
+    ESP.wdtDisable();
+
+    // delay(200);
+    while (attempt < MAX_ATTEMPT_COUNT)
     {
-        sprintln(".");
-        delay(500);
+        sprintln("Attempt " + String(attempt));
+
+        WiFi.begin(ssid, pw);
+
+        if (WiFi.waitForConnectResult(5000) == WL_CONNECTED)
+        {
+            break;
+        }
+        ESP.wdtFeed();
         attempt += 1;
+        delay(200);
     }
 
     if (attempt >= MAX_ATTEMPT_COUNT)
@@ -201,20 +209,12 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         return false;
     }
 
-    // do
+    // if (attempt >= MAX_ATTEMPT_COUNT)
     // {
+    //     sprintln("[ERROR] Cant connect!");
 
-    //     // sprintln(LOG_PREFIX + "Attempt " + String(attempt) + "...");
-
-    //     // delay(1000);
-
-    //     if (attempt >= MAX_ATTEMPT_COUNT)
-    //     {
-    //         sprintln("[ERROR] Cant connect!");
-
-    //         return false;
-    //     }
-    // } while (WiFi.status() != WL_CONNECTED);
+    //     return false;
+    // }
 
     sprintln(LOG_PREFIX + "success");
     // server setup
@@ -243,11 +243,6 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     MDNS.addService("http", "tcp", NetworkPort);
 
     sprintln(line);
-
-    // ConfigureTZ(wifiManager);
-
-    ESPAsync_WiFiManager wifiManager(&_server, &_dnsServer, DNS_SERVER_URL);
-    wifiManager.setMinimumSignalQuality(-1);
 
     WiFi.enableAP(false);
 
@@ -280,7 +275,7 @@ NetworkManager::NetworkManager()
 {
     Instance = this;
 
-    WiFi.config(ip, gateway, subnet);
+    // WiFi.config(ip, gateway, subnet);
 
     stringPort = ":" + String(NetworkPort);
 

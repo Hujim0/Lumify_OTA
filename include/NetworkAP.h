@@ -7,7 +7,7 @@
 class NetworkAP
 {
 private:
-    DNSServer dnsServer;
+    // DNSServer dnsServer;
 
 public:
     bool StartCaptivePortal(const char *ssid);

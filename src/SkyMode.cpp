@@ -1,4 +1,5 @@
 #include <SkyMode.h>
+#include <global.h>
 
 const unsigned long MILLIS_BEFORE_SUNRISE_START = 0;
 #define SECONDS_BEFORE_SKY_SHOWS 40.0F
@@ -20,11 +21,12 @@ void SkyMode::update(CRGB *leds)
         ShowEditMode(leds);
         return;
     }
+    // sprintln(String(millis()));
 
     if (millis() < sunrise_start_time)
         return;
 
-    SecondsSinceSunriseStart = (float)(millis() - sunrise_start_time) / (1000.0F * (2.0F - speed));
+    SecondsSinceSunriseStart = (float)(millis() - sunrise_start_time) / (1000.0F * (2.1F - speed));
 
     // initial sunrise ligtht
     if (SecondsSinceSunriseStart <= SECONDS_BEFORE_SKY_SHOWS)
@@ -62,6 +64,9 @@ void SkyMode::update_args(const char *data)
     sunset_point = args[END_ARG].as<int>();
     speed = args[SPEED_ARG].as<float>();
 
+    // Serial.print("sunrise start: ");
+    // Serial.println(sunrise_start_time);
+
     args.garbageCollect();
 
     SKY_COLOR = CHSV(0, 255, 60);
@@ -76,8 +81,7 @@ void SkyMode::update_arg(String arg, String value)
 }
 SkyMode::SkyMode(const char *data)
 {
-    Serial.print("sunrise start: ");
-    Serial.println(sunrise_start_time);
+
     update_args(data);
 }
 
@@ -169,7 +173,7 @@ void SkyMode::TiltColors(float SecondsSinceSunriseStart, CRGB *leds)
                      2 + (int)floorf(phase * 1.4F),
                      removeNegatives(((int)floorf(phase * 2.0F)) - 3));
 
-    printCRGB(SKY_COLOR);
+    // printCRGB(SKY_COLOR);
 
     for (int i = 0; i < NUMPIXELS; i++)
     {

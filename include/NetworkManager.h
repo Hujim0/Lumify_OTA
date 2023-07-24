@@ -6,15 +6,11 @@
 
 #pragma once
 
-#include <NetworkDefines.h>
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
 #include <Arduino.h>
-#include <ESPAsync_WiFiManager.hpp>
 
 #include <ESP8266WiFi.h>
-#include <ESPAsyncDNSServer.h>
-#include <ESP8266WiFiMulti.h>
 
 #define DEFAULT_PORT 80
 
@@ -53,7 +49,6 @@ public:
     AsyncWebServer _server = AsyncWebServer(DEFAULT_PORT);
     AsyncWebSocket _webSocket = AsyncWebSocket("/ws");
     AsyncEventSource _events = AsyncEventSource("/events");
-    AsyncDNSServer _dnsServer;
 
     String stringPort;
 

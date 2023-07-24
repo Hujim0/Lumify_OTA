@@ -5,13 +5,13 @@
 
 bool NetworkAP::StartCaptivePortal(const char *ssid)
 {
-    WiFi.mode(WiFiMode_t::WIFI_AP);
-
     WiFi.softAPConfig(ip, gateway, subnet);
 
-    WiFi.softAP(String(ssid) + "http://" + ip.toString(), "", 1, 0, 16, 100);
+    WiFi.mode(WiFiMode_t::WIFI_AP);
 
-    sprintln(LOG_PREFIX + "AP started!");
+    WiFi.softAP(String(ssid) + "http://" + WiFi.softAPIP().toString(), "", 1, 0, 16, 100);
+
+    sprintln(LOG_PREFIX + "AP started!" + " http://" + WiFi.softAPIP().toString());
 
     // WiFi.softAPgetStationNum();
 
@@ -32,5 +32,5 @@ void NetworkAP::update()
 void NetworkAP::CloseCaptivePortal()
 {
     isActive = false;
-    dnsServer.stop();
+    // dnsServer.stop();
 }

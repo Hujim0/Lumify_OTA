@@ -131,10 +131,17 @@ void SetupCaptivePortal()
 
   // network._server.addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 
+  network.ServeStatic("/data", LittleFS, "/", "max-age=600");
+
   network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
                             { if(request->hasArg("ssid")) {
-                                network.BeginSTA(request->arg("ssid").c_str(),
+                                SaveWifiCredentials(request->arg("ssid").c_str(),
                                                 request->arg("pw").c_str()); 
+
+                                ESP.reset();
+
+                                // network.BeginSTA(request->arg("ssid").c_str(),
+                                //                 request->arg("pw").c_str()); 
                                 request->send(200);
                                 return;
                             }
@@ -143,6 +150,7 @@ void SetupCaptivePortal()
                                   LittleFS,
                                   "/web/configure/configure.html",
                                   "text/html")); });
+  // network._server.
 
   network._server.begin();
 }
@@ -346,6 +354,12 @@ void AddServerHandlers()
       SavePreferences(&preferences);
     }
     request->send(200); });
+
+  network.AddWebPageHandler("/fullreset", [](AsyncWebServerRequest *request)
+                            { SaveWifiCredentials("", "");
+                              delay(100);
+                              request->send(200);
+                              ESP.reset(); });
 
   //====================================================
 

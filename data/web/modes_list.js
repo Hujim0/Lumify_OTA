@@ -47,6 +47,7 @@ class ModeList {
         // this.eventSource.onmessage = function (event) {
         //     alert(event.data);
         // };
+        // this.save_modes = true;
 
         this.eventSource.addEventListener("mode_changed", this.onModeChanged);
     }
@@ -102,6 +103,8 @@ class ModeList {
                 modeList.current_mode[event.target.json_arg_name] =
                     event.target[event.target.input_type_getter];
 
+                console.log(JSON.stringify(modeList.current_mode));
+
                 modeList.ChangeMode(
                     this.current_mode_id,
                     JSON.stringify(modeList.current_mode),
@@ -116,7 +119,7 @@ class ModeList {
 
     ChangeMode(id, args_string, save = true, update_ui = true) {
         let uri = "/mode?id=" + id;
-        if (save && save_modes) {
+        if (save && modeList.save_modes) {
             uri += "&save";
         }
 

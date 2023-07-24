@@ -1,11 +1,3 @@
 {
-    "events": [
-        {
-            "epoch_time": 73800,
-            "transition": 0,
-            "event_type": 0,
-            "value": 255,
-            "args": ""
-        }
-    ]
+    "events": []
 }
