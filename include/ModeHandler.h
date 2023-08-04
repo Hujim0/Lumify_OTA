@@ -25,7 +25,7 @@ public:
     void ChangeBrightness(int);
     void ChangeMode(int, const char *);
     void UpdateArgs(const char *);
-    void PushArg(String, String);
+    void PushArg(const char *arg, const char *data);
     void update(CRGB *);
     ModeHandler();
     ~ModeHandler();

@@ -10,15 +10,15 @@
 
 void AddServerHandlers();
 // void OnClientConnected(int);
-void OnWebSocketMessage(String);
-void ApplyPreferences(String);
-void ChangeLanguage(String);
+void OnWebSocketMessage(const char *);
+void ApplyPreferences(const char *);
+void ChangeLanguage(const char *);
 void SetupFastLED();
 void minuteSecondTimer();
 void ConnectToWifi();
 void LoadTimeEvents();
 void TryReconnect();
-void onTimeEventFired(float, EventType eventType, int value, String args);
+void onTimeEventFired(float, EventType eventType, int value, const char *args);
 void SetupCaptivePortal();
 void OnConnected();
 void NewCredentials(const char *ssid, const char *pw);

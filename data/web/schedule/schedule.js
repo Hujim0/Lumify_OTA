@@ -118,6 +118,7 @@ window.addEventListener(ON_GET_PREFERENCES_EVENT, (event) => {
     prev_brightness = event.detail.brightness;
 
     sendGetRequest("../data/time_events.json", (status, responseText) => {
+        console.log(status, responseText);
         current_time_events = JSON.parse(responseText)["events"];
         SortAndCreateCurrentTimeEvents();
     });

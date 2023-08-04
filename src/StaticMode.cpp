@@ -23,14 +23,14 @@ void StaticMode::update_args(const char *data)
     StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> args;
     deserializeJson(args, data);
 
-    color = toHex(args[COLOR_ARG].as<String>());
+    color = toHex(args[COLOR_ARG].as<const char *>());
 
     args.garbageCollect();
 }
 
-void StaticMode::update_arg(String arg, String value)
+void StaticMode::update_arg(const char *arg, const char *value)
 {
-    if (arg == COLOR_ARG)
+    if (strcmp(arg, COLOR_ARG))
         color = toHex(value);
 }
 StaticMode::~StaticMode() {}

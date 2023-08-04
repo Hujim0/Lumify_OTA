@@ -13,7 +13,6 @@ class TimeEvent
 public:
     bool CheckTime(int /*, int*/);
 
-    bool Equals(int epoch, int event_Type);
     bool Equals(int epoch, EventType eventType);
     int epochTime;
     // bool *daysOfTheWeek;
@@ -21,10 +20,10 @@ public:
     EventType eventType;
     int value;
     float transition;
-    String args;
+    const char *args;
 
-    String stringify();
+    const char *stringify();
 
-    TimeEvent(int epoch, float transition, EventType type, int value, String args);
+    TimeEvent(int epoch, float transition, EventType type, int value, const char *args);
     TimeEvent();
 };

@@ -4,4 +4,4 @@
 #include <Arduino.h>
 #define sprintln Log::Instance->Println
 
-const String line = "------------------------------------------------------------------";
+const char *line = "------------------------------------------------------------------";

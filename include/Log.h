@@ -24,9 +24,8 @@ public:
     File currentFile;
 
     // void Print(const char *);
-    void Println(String);
-    String GetFileName(int id);
-    String GetFileName(String id);
+    void Println(const char *);
+    const char *GetFileName(int &id);
 
     void Begin();
 

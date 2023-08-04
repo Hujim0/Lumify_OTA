@@ -3,7 +3,7 @@
 #include <TimeManager.h>
 #include <TimeEvent.h>
 
-const String LOG_PREFIX = "[TimeManager] ";
+const char *LOG_PREFIX = "[TimeManager] ";
 
 TimeManager *TimeManager::Instance = 0;
 
@@ -36,7 +36,17 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 
     isReady = true;
 
-    sprintln(LOG_PREFIX + "Got time! " + GetCurrentFormattedTime() + ", day of the week: " + String(dayOfTheWeek));
+    char msg[50] = "";
+
+    strcat(msg, LOG_PREFIX);
+    strcat(msg, "Got time!");
+    strcat(msg, GetCurrentFormattedTime());
+    strcat(msg, ", day of the week: ");
+    itoa(dayOfTheWeek, msg + strlen(msg), DEC);
+
+    sprintln(msg);
+
+    // sprintln(LOG_PREFIX + "Got time! " + GetCurrentFormattedTime() + ", day of the week: " + String(dayOfTheWeek));
 }
 
 void TimeManager::Update()
@@ -75,14 +85,20 @@ void TimeManager::UpdateMinutes()
 
     // time events (minute update)
 
-    for (int i = 0; i < timeEvents.size(); i++)
+    for (size_t i = 0; i < timeEventsCounter; i++)
     {
         bool result = timeEvents[i].CheckTime(epoch_time_day_seconds /*, dayOfTheWeek*/);
 
         if (!result)
             continue;
 
-        sprintln(LOG_PREFIX + "TimeEvent executed: " + timeEvents[i].stringify());
+        char msg[100] = "";
+
+        strcat(msg, LOG_PREFIX);
+        strcat(msg, "TimeEvent executed: ");
+        strcat(msg, timeEvents[i].stringify());
+
+        sprintln(msg);
     }
 
     if (timer != NULL)
@@ -103,93 +119,73 @@ void TimeManager::UpdateSeconds()
     UpdateMinutes();
 }
 
-String TimeManager::GetCurrentFormattedTime()
+const char *TimeManager::GetCurrentFormattedTime()
 {
     if (!isReady)
         return "unknown";
 
-    String time = "";
+    char res[10] = "";
 
     if (hours < 10)
-        time += "0";
-    time += String(hours) + ":";
+        strcat(res, "0");
+    itoa(hours, strchr(res, NULL), DEC);
+    strcat(res, ":");
+    // time += hours + ":";
     if (minutes < 10)
-        time += "0";
-    time += String(minutes) + ":";
+        strcat(res, "0");
+    itoa(minutes, strchr(res, NULL), DEC);
+    strcat(res, ":");
     if (seconds < 10)
-        time += "0";
-    time += String(seconds);
+        strcat(res, "0");
+    itoa(seconds, strchr(res, NULL), DEC);
+    strcat(res, ":");
 
-    return time;
+    return res;
 }
 
-String TimeManager::FormatTime(int epoch)
+const char *TimeManager::FormatTime(int epoch)
 {
     int _hours = epoch / 3600;
     int _minutes = (epoch % 3600) / 60;
     int _seconds = epoch % 60;
 
-    String time = "";
+    char res[10] = "";
 
     if (_hours < 10)
-        time += "0";
-    time += String(_hours) + ":";
+        strcat(res, "0");
+    itoa(_hours, strchr(res, NULL), DEC);
+    strcat(res, ":");
+    // time += hours + ":";
     if (_minutes < 10)
-        time += "0";
-    time += String(_minutes) + ":";
+        strcat(res, "0");
+    itoa(_minutes, strchr(res, NULL), DEC);
+    strcat(res, ":");
     if (_seconds < 10)
-        time += "0";
-    time += String(_seconds);
+        strcat(res, "0");
+    itoa(_seconds, strchr(res, NULL), DEC);
+    strcat(res, ":");
 
-    return time;
+    return res;
 }
 
 TimeManager::TimeManager() {}
 
-void TimeManager::AddTimeEvent(TimeEvent event)
+void TimeManager::AddTimeEvents(TimeEvent *events, size_t count)
 {
-    timeEvents.add(event);
-
-    sprintln(LOG_PREFIX + "Added " + event.stringify());
+    timeEventsCounter = count;
+    timeEvents = events;
 }
 
 void TimeManager::CleanTimeEvents()
 {
-    timeEvents.clear();
-    sprintln(LOG_PREFIX + "Cleared list");
+    timeEvents = NULL;
 }
-
-// void TimeManager::RemoveTimeEvent(int epoch_time, int event_type)
-// {
-//     int delete_index = -1;
-
-//     for (int i = 0; i < timeEvents.size(); i++)
-//     {
-//         if (timeEvents[i].Equals(epoch_time, event_type))
-//         {
-//             delete_index = i;
-//         }
-//     }
-
-//     if (delete_index == -1)
-//     {
-//         sprintln(LOG_PREFIX + "Delete error: timeEvent not found at " + FormatTime(epoch_time) + ", type: " + String(event_type));
-//         return;
-//     }
-
-//     timeEvents.remove(delete_index);
-// }
-
-// void TimeManager::RemoveLastTimeEvent()
-// {
-//     timeEvents.remove(timeEvents.size() - 1);
-// }
 
 void TimeManager::setOnEventFiredEvent(OnEventFired handler)
 {
     onEventFired = handler;
 }
-void TimeManager::InvokeOnEventFired(float transition, EventType eventType, int value, String args)
+void TimeManager::InvokeOnEventFired(float transition, EventType eventType, int value, const char *args)
 {
     if (onEventFired != NULL)
         onEventFired(transition, eventType, value, args);
@@ -198,4 +194,43 @@ void TimeManager::InvokeOnEventFired(float transition, EventType eventType, int 
 int TimeManager::GetEpochTime()
 {
     return epoch_time_day_seconds;
+}
+
+void TimeManager::AddTimeEventsFromJson(JsonVariant json)
+{
+    JsonArray time_events_array_json = json["events"];
+
+    size_t count = time_events_array_json.size();
+
+    TimeEvent events[count];
+
+    char msg_prefix[20] = "";
+
+    strcat(msg_prefix, LOG_PREFIX);
+    strcat(msg_prefix, "Added ");
+
+    for (size_t i = 0; i < count; i++)
+    {
+        events[i] = TimeEvent(
+            time_events_array_json[i]["epoch_time"].as<int>(),
+            time_events_array_json[i]["transition"].as<float>(),
+            (EventType)time_events_array_json[i]["event_type"].as<int>(),
+            time_events_array_json[i]["value"].as<int>(),
+            time_events_array_json[i]["args"].as<const char *>());
+
+        char msg[100];
+
+        strcpy(msg, msg_prefix);
+        strcat(msg, events[i].stringify());
+
+        sprintln(msg);
+
+        // sprintln(LOG_PREFIX + "Added " + events[i].stringify());
+    }
+
+    time_events_array_json.clear();
+
+    AddTimeEvents(events, count);
+
+    json.clear();
 }

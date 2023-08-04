@@ -45,7 +45,7 @@ void ModeHandler::ChangeMode(int id, const char *args)
         return;
 
     default:
-        ChangeMode(0, GetModeArgsDefault(0).c_str());
+        ChangeMode(0, GetModeArgsDefault(0));
         return;
     }
 }
@@ -60,7 +60,7 @@ void ModeHandler::UpdateArgs(const char *data)
     if (current_mode != NULL)
         current_mode->update_args(data);
 }
-void ModeHandler::PushArg(String arg, String value)
+void ModeHandler::PushArg(const char *arg, const char *value)
 {
     if (current_mode != NULL)
         current_mode->update_arg(arg, value);

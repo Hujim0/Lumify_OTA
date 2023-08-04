@@ -28,10 +28,10 @@ void SaveWifiCredentials(const char *ssid, const char *pw)
     file.close();
 }
 
-void SavePreferences(String preferences_json)
+void SavePreferences(const char *preferences_json)
 {
     File file = LittleFS.open(PREFERENCES_PATH, "w");
-    file.write(preferences_json.c_str());
+    file.write(preferences_json);
     file.close();
 }
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preferences_json)
@@ -44,88 +44,95 @@ void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preference
     preferences_json->garbageCollect();
 }
 
-String LoadPreferences()
+const char *LoadPreferences()
 {
     File file = LittleFS.open(PREFERENCES_PATH, "r");
-    String data = file.readString();
+    const char *data = file.readString().c_str();
     file.close();
     return data;
 }
 
-String GetModeArgs(int id)
+const char *GetModeArgs(int id)
 {
-    String path = "/modes/mode" + String(id) + ".json";
+    const char *path = GetModeArgsFilePath(id);
 
     if (!LittleFS.exists(path))
         return "";
 
     File file = LittleFS.open(path, "r");
-    String data = file.readString();
+    const char *data = file.readString().c_str();
     file.close();
     return data;
 }
 
-String GetModeArgsFilePath(String id)
+const char *GetModeArgsFilePath(int id)
 {
-    String path = "/modes/mode" + id + ".json";
+    char path[32] = "/modes/mode";
+    itoa(id, strchr(path, NULL), DEC);
+    strcat(path, ".json");
 
-    if (!LittleFS.exists(path))
-        return "";
     return path;
 }
 
-void SaveModeArgs(int id, String json)
+const char *GetModeArgsFilePath(const char *id)
 {
-    File file = LittleFS.open("/modes/mode" + String(id) + ".json", "w");
-    file.write(json.c_str());
+    char path[32] = "/modes/mode";
+    strcat(path, id);
+    strcat(path, ".json");
+
+    return path;
+}
+
+void SaveModeArgs(int id, const char *json)
+{
+    File file = LittleFS.open(GetModeArgsFilePath(id), "w");
+    file.write(json);
     file.close();
 }
 
-// String GetElements(int id)
-// {
-//     String path = "/modes/elements/elements" + String(id) + ".json";
-
-//     if (!LittleFS.exists(path))
-//         return "";
-
-//     File file = LittleFS.open(path, "r");
-//     String data = file.readString();
-//     file.close();
-//     return data;
-// }
-String GetElementsFilePath(String lang, String id)
+const char *GetElementsFilePath(const char *lang, const char *id)
 {
-    String path = "modes/elements/" + lang + "/elements" + id + ".json";
+    char path[32] = "/modes/elements/";
 
-    if (!LittleFS.exists(path))
-        return "";
+    strcat(path, lang);
+    strcat(path, "/elements");
+    strcat(path, id);
+    strcat(path, ".json");
+
     return path;
 }
 
-String GetTimeEvents()
+const char *GetTimeEvents()
 {
     File file = LittleFS.open("/time_events.json", "r");
-    String data = file.readString();
+    const char *data = file.readString().c_str();
     file.close();
     return data;
 }
 
-void SaveTimeEvents(String data)
+void SaveTimeEvents(const char *data)
 {
     File file = LittleFS.open("/time_events.json", "w");
-    file.write(data.c_str());
+    file.write(data);
     file.close();
 }
 
-String GetModeArgsDefault(int id)
+const char *GetModeArgsDefault(int id)
 {
-    String path = "/modes/default/mode" + String(id) + ".json";
+    char path[32] = "/modes/default/mode";
+    itoa(id, strchr(path, NULL), DEC);
+    strcat(path, ".json");
 
     if (!LittleFS.exists(path))
         return "";
 
     File file = LittleFS.open(path, "r");
-    String data = file.readString();
+    const char *data = file.readString().c_str();
     file.close();
     return data;
+}
+
+bool FileExists(const char *path)
+{
+    return LittleFS.exists(path);
 }

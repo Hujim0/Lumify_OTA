@@ -11,13 +11,15 @@
 
 #define DEFAULT_PORT 80
 
-const String LOG_PREFIX = "[Network] ";
+const char *LOG_PREFIX = "[Network] ";
 
 #define ATTEMPT_DURATION 5000
 
+const int MAX_ATTEMPT_COUNT = 5;
+
 #define DEBUG_WIFI_SETTINGS
 
-typedef std::function<void(String)> OnNewMessageHandler;
+typedef std::function<void(const char *)> OnNewMessageHandler;
 typedef std::function<void(int)> OnNewClientHandler;
 typedef std::function<void()> OnConnectionLostHandler;
 typedef std::function<void()> OnConnectionSuccessfulHandler;
@@ -39,7 +41,7 @@ private:
     String buffer;
     uint64_t buffer_size;
 
-    String url;
+    const char *url;
 
 public:
     OnNewClientHandler onNewClientHandler = NULL;
@@ -48,7 +50,7 @@ public:
     AsyncWebSocket _webSocket = AsyncWebSocket("/ws");
     AsyncEventSource _events = AsyncEventSource("/events");
 
-    String stringPort;
+    const char *stringPort;
 
     uint16_t NetworkPort = DEFAULT_PORT;
 
@@ -66,16 +68,16 @@ public:
     void SentTextToAll(const char *msg);
     void CleanUp();
 
-    void AddWebPageHandler(String uri, ArRequestHandlerFunction function);
     void AddWebPageHandler(const char *uri, ArRequestHandlerFunction function);
-    void AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func);
+    void AddJSONBodyHandler(const char *uri, ArJsonRequestHandlerFunction func);
 
     void ServeStatic(const char *uri, fs::FS &fs, const char *path, const char *cache_control = (const char *)__null);
     void CheckStatus();
     void SendEvent(const char *event_name, const char *msg);
 
     static NetworkManager *Instance;
-    String getUrl();
+    const char *getUrl();
+    static const char *stringifyWifiMode(WiFiMode);
 
     bool BeginSTA(const char *ssid, const char *pw);
     void loop();

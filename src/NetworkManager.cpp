@@ -6,8 +6,6 @@
 
 #define SERIAL_WEBSOCKET
 
-const int MAX_ATTEMPT_COUNT = 3;
-
 // singleton initializer
 NetworkManager *NetworkManager::Instance = 0;
 
@@ -17,14 +15,31 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
     switch (type)
     {
     case WS_EVT_CONNECT:
-        sprintln("[Websocket] client #" + String(client->id()) + " connected from " + client->remoteIP().toString());
+    {
+        char msg[64] = "";
+
+        strcat(msg, "[Websocket] client #");
+        itoa(client->id(), strchr(msg, NULL), DEC);
+        strcat(msg, " connected from ");
+        strcat(msg, client->remoteIP().toString().c_str());
+
+        sprintln(msg);
+    }
 
         if (NetworkManager::Instance->onNewClientHandler != NULL)
             NetworkManager::Instance->onNewClientHandler(client->id());
 
         break;
     case WS_EVT_DISCONNECT:
-        sprintln("[Websocket] client #" + String(client->id()) + " disconnected");
+    {
+        char msg[64] = "";
+
+        strcat(msg, "[Websocket] client #");
+        itoa(client->id(), strchr(msg, 0), DEC);
+        strcat(msg, "disconnected");
+
+        sprintln(msg);
+    }
         NetworkManager::Instance->CleanUp();
         break;
     case WS_EVT_DATA:
@@ -54,21 +69,33 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
     {
         buffer_size += len;
         buffer += (char *)data;
+        {
+            char msg[128] = "";
 
-        sprintln("[Websocket] Partial message: " + String(buffer_size) + " / " + String(info->len) + " \"" + String((char *)data) + "\" --endln");
+            strcat(msg, "[Websocket] Partial message: ");
+            itoa(buffer_size, strchr(msg, NULL), DEC);
+            strcat(msg, " / ");
+            itoa(info->len, strchr(msg, NULL), DEC);
+            strcat(msg, " \"");
+            strcat(msg, (char *)data);
+            strcat(msg, "\" --endln");
+
+            sprintln(msg);
+        }
 
         if (info->len != buffer_size)
             return;
 
-        onNewMessageHandler(buffer);
+        onNewMessageHandler(buffer.c_str());
 
         buffer_size = (uint64_t)0;
+        buffer[0] = NULL;
         buffer = "";
 
         return;
     }
 
-    onNewMessageHandler((String)(char *)data);
+    onNewMessageHandler((char *)data);
 
     return;
 }
@@ -79,20 +106,24 @@ void NetworkManager::SentTextToClient(int id, const char *data)
 }
 void NetworkManager::SentTextToAll(const char *data)
 {
-    sprintln("[Websocket] Texted to all: " + String(data));
+    {
+        char msg[128] = "";
+
+        strcat(msg, "[Websocket] Texted to all: ");
+        strcat(msg, data);
+
+        sprintln(data);
+    }
+
     _webSocket.textAll(data);
 }
 
-void NetworkManager::AddWebPageHandler(String uri, ArRequestHandlerFunction func)
-{
-    _server.on(uri.c_str(), HTTP_GET, func);
-}
 void NetworkManager::AddWebPageHandler(const char *uri, ArRequestHandlerFunction func)
 {
     _server.on(uri, HTTP_GET, func);
 }
 
-void NetworkManager::AddJSONBodyHandler(const String &uri, ArJsonRequestHandlerFunction func)
+void NetworkManager::AddJSONBodyHandler(const char *uri, ArJsonRequestHandlerFunction func)
 {
     // server.on(uri, HTTP_POST, func, upload, body);
     AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler(uri, func);
@@ -131,6 +162,11 @@ void NetworkManager::OnNewCredentials(OnNewCredentialsHandler handler)
     onNewCredentialsHandler = handler;
 }
 
+void NetworkManager::OnLostWifiConnection(OnLostWifiConnectionHandler handler)
+{
+    onLostWifiConnectionHandler = handler;
+}
+
 void NetworkManager::CleanUp()
 {
     _webSocket.cleanupClients();
@@ -141,7 +177,7 @@ void NetworkManager::ServeStatic(const char *uri, fs::FS &fs, const char *path, 
     _server.serveStatic(uri, fs, path, cache_control);
 }
 
-String NetworkManager::getUrl()
+const char *NetworkManager::getUrl()
 {
     return url;
 }
@@ -150,38 +186,73 @@ void NetworkManager::TryReconnect()
 {
     if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
         return;
+
+    {
+        char msg[32] = "";
+
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "Trying to reconnect...");
+
+        sprintln(msg);
+    }
+
+    char msg[32] = "";
+
+    strcpy(msg, LOG_PREFIX);
+
     if (WiFi.reconnect())
     {
-        sprintln(LOG_PREFIX + "Success!");
+
+        strcat(msg, "Success!");
     }
     else
     {
-        sprintln(LOG_PREFIX + "Cant reconnect!");
+        strcat(msg, "Cant reconnect!");
     }
+
+    sprintln(msg);
 }
 bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 {
     WiFi.mode(WiFiMode_t::WIFI_STA);
 
 #ifdef DEBUG_WIFI_SETTINGS
-    sprintln(LOG_PREFIX + "Wifi credentials: " + String(ssid) + " " + String(pw));
-    // sprintln(line);
+    {
+        char msg[100] = "";
+
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "Wifi credentials: ");
+        strcat(msg, ssid);
+        strcat(msg, pw);
+
+        sprintln(msg);
+    }
 #endif
+    {
+        char msg[32] = "";
 
-    sprintln(LOG_PREFIX + "Connecting to Wifi...");
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "Connecting to Wifi...");
 
-    // WiFi.config(WiFi.localIP(), WiFi.localIP(), subnet);
-
-    // delay(500);
+        sprintln(msg);
+    }
 
     int attempt = 1;
 
     ESP.wdtDisable();
 
-    // delay(200);
     while (attempt <= MAX_ATTEMPT_COUNT)
     {
-        sprintln("Attempt " + String(attempt));
+        {
+            char msg[32] = "";
+
+            strcpy(msg, LOG_PREFIX);
+            strcat(msg, "Attempt ");
+            itoa(attempt, strchr(msg, 0), DEC);
+            strcat(msg, "...");
+
+            sprintln(msg);
+        }
 
         WiFi.begin(ssid, pw);
 
@@ -201,7 +272,14 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         return false;
     }
 
-    sprintln(LOG_PREFIX + "success");
+    {
+        char msg[32] = "";
+
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "success");
+
+        sprintln(msg);
+    }
     // server setup
 
     _server.begin();
@@ -214,17 +292,46 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     _webSocket.onEvent(onNewEvent);
     _webSocket.closeAll();
     // print server url
-    url = "http://" + WiFi.localIP().toString() + stringPort;
 
-    sprintln(LOG_PREFIX + "HTTP server started at \"" + url + "\"");
+    {
+        char _url[64] = "";
+
+        strcpy(_url, "http://");
+        strcat(_url, WiFi.localIP().toString().c_str());
+        strcat(_url, stringPort);
+
+        url = _url;
+    }
+
+    {
+        char msg[128] = "";
+
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "HTTP server started at \"");
+        strcat(msg, url);
+        strcat(msg, "\"");
+        sprintln(msg);
+    }
 
     if (!MDNS.begin(DNS_SERVER_URL))
     {
-        sprintln(LOG_PREFIX + "Error setting up MDNS responder!");
+        sprintln("[ERROR] Can't set up MDNS responder!");
         return false;
     }
 
-    sprintln(LOG_PREFIX + "mDNS responder started: \"http://" + String(DNS_SERVER_URL) + ".local" + stringPort + "\"");
+    {
+        char msg[128] = "";
+
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "mDNS responder started: \"http://");
+        strcat(msg, DNS_SERVER_URL);
+        strcat(msg, ".local");
+        strcat(msg, stringPort);
+        strcat(msg, "\"");
+
+        sprintln(msg);
+    }
+
     MDNS.addService("http", "tcp", NetworkPort);
 
     sprintln(line);
@@ -260,26 +367,57 @@ NetworkManager::NetworkManager()
 {
     Instance = this;
 
-    stringPort = ":" + String(NetworkPort);
-
     if (NetworkPort == 80)
         stringPort = "";
+    else
+    {
+        char port[10] = "";
+
+        strcpy(port, ":");
+        itoa(NetworkPort, strchr(port, 0), DEC);
+
+        stringPort = port;
+    }
 
     WiFi.onWiFiModeChange([](const WiFiEventModeChange &event)
-                          { sprintln(LOG_PREFIX + "Switched Wifi mode: " + event.oldMode + " -> " + event.newMode);
-                          delay(200); });
+                          {
+        char msg[128] = "";
 
-    onLostWifiConnectionHandler = [](const WiFiEventStationModeDisconnected &event)
-    {
-        sprintln(LOG_PREFIX + "Disconnected from Wifi: " + event.ssid);
-    };
+        strcpy(msg, LOG_PREFIX);
+        strcat(msg, "Switched Wifi mode: ");
+        strcat(msg, stringifyWifiMode(event.oldMode));
+        strcat(msg, " -> ");
+        strcat(msg, stringifyWifiMode(event.newMode));
 
-    WiFi.onStationModeDisconnected(onLostWifiConnectionHandler);
+        sprintln(msg);
+    
+        delay(200); });
+
+    // onLostWifiConnectionHandler = [](const WiFiEventStationModeDisconnected &event)
+    // {
+    //     sprintln(LOG_PREFIX + "Disconnected from Wifi: " + event.ssid);
+    // };
+
+    // WiFi.onStationModeDisconnected(onLostWifiConnectionHandler);
 
     WiFi.setSleepMode(WiFiSleepType_t::WIFI_NONE_SLEEP);
 }
 
-void NetworkManager::OnLostWifiConnection(OnLostWifiConnectionHandler handler)
+const char *NetworkManager::stringifyWifiMode(WiFiMode mode)
 {
-    onLostWifiConnectionHandler = handler;
+    switch (mode)
+    {
+    case WiFiMode::WIFI_AP:
+        return "WIFI_AP";
+    case WiFiMode::WIFI_AP_STA:
+        return "WIFI_AP_STA";
+    case WiFiMode::WIFI_OFF:
+        return "WIFI_OFF";
+    case WiFiMode::WIFI_STA:
+        return "WIFI_STA";
+    default:
+        return "";
+    }
+
+    return "";
 }

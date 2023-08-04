@@ -45,10 +45,10 @@ void RainbowMode::update_args(const char *data)
     args.garbageCollect();
 }
 
-void RainbowMode::update_arg(String arg, String value)
+void RainbowMode::update_arg(const char *arg, const char *value)
 {
-    if (arg == SPEED_ARG)
-        speed = value.toFloat();
+    if (strcmp(arg, SPEED_ARG))
+        speed = atof(value);
 
     if (!reversed)
     {

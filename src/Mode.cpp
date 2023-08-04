@@ -1,9 +1,11 @@
 #include <Mode.h>
 #include <global.h>
 
-uint32_t Mode::toHex(String hex)
+uint32_t Mode::toHex(const char *hex)
 {
-    long a = strtol(hex.substring(1).c_str(), 0, 16);
+    char _hex[10] = "";
+    strcpy(_hex, hex + 1);
+    long a = strtol(hex, 0, 16);
     return (uint32_t)a;
 }
 
@@ -18,5 +20,14 @@ int Mode::removeNegatives(int num)
 
 void Mode::printCRGB(CRGB color)
 {
-    sprintln("r:" + String(color.r) + ",g:" + String(color.g) + ",b:" + String(color.b));
+    char msg[32] = "";
+
+    strcat(msg, "r:");
+    itoa(color.r, strchr(msg, NULL), DEC);
+    strcat(msg, "g:");
+    itoa(color.g, strchr(msg, NULL), DEC);
+    strcat(msg, "b:");
+    itoa(color.b, strchr(msg, NULL), DEC);
+
+    sprintln(msg);
 }

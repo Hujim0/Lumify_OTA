@@ -11,7 +11,7 @@ private:
 public:
     void update(CRGB *);
     void update_args(const char *data);
-    void update_arg(String arg, String value);
+    void update_arg(const char *arg, const char *value);
     StaticMode();
     StaticMode(const char *);
     ~StaticMode();

@@ -3,10 +3,9 @@
 #include <Arduino.h>
 #include <ModeHandler.h>
 #include <TimeEvent.h>
-#include <ESP_LinkedList.h>
 
 typedef std::function<void()> OneMinuteTimer;
-typedef std::function<void(float, EventType, int, String)> OnEventFired;
+typedef std::function<void(float, EventType, int, const char *)> OnEventFired;
 
 class TimeManager
 {
@@ -14,33 +13,34 @@ private:
     int epoch_time_day_seconds = 0;
     unsigned long MillisOffset = 0UL;
     int dayOfTheWeek = 0;
-    ESP_LinkedList<TimeEvent> timeEvents;
-    int timeEventsCounter = 0;
+    TimeEvent *timeEvents = NULL;
+    size_t timeEventsCounter = 0;
     OnEventFired onEventFired;
 
     // int OneMinuteCounter = 0;
     bool isReady = false;
 
-    int seconds;
+    uint8_t seconds;
     void UpdateSeconds();
-    int minutes;
+    uint8_t minutes;
     void UpdateMinutes();
-    int hours;
+    uint8_t hours;
     void UpdateHours();
 
 public:
     void setOnEventFiredEvent(OnEventFired);
-    void InvokeOnEventFired(float, EventType, int, String);
+    void InvokeOnEventFired(float transition, EventType type, int value, const char *args);
     void Setup(int epoch_time_day_seconds, int dayOfTheWeek);
     void Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> &preferences);
     void Update();
-    String GetCurrentFormattedTime();
+    const char *GetCurrentFormattedTime();
     int GetEpochTime();
-    static String FormatTime(int);
+    static const char *FormatTime(int);
 
     OneMinuteTimer timer;
 
-    void AddTimeEvent(TimeEvent handler);
+    void AddTimeEvents(TimeEvent *events, size_t count);
+    void AddTimeEventsFromJson(JsonVariant doc);
     void CleanTimeEvents();
 
     TimeManager();

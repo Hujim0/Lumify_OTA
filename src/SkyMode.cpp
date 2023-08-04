@@ -72,11 +72,11 @@ void SkyMode::update_args(const char *data)
     SKY_COLOR = CHSV(0, 255, 60);
     SUN_COLOR = CRGB(255, 0, 0);
 }
-void SkyMode::update_arg(String arg, String value)
+void SkyMode::update_arg(const char *arg, const char *value)
 {
-    if (arg = SPEED_ARG)
+    if (strcmp(arg, SPEED_ARG))
     {
-        speed = value.toFloat();
+        speed = atof(value);
     }
 }
 SkyMode::SkyMode(const char *data)

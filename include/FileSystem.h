@@ -10,16 +10,18 @@
 
 void GetWifiCredentials(String *data_write_to);
 void SaveWifiCredentials(const char *ssid, const char *pw);
-String LoadPreferences();
-void SavePreferences(String json_string);
+const char *LoadPreferences();
+void SavePreferences(const char *json_string);
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *json);
-void SaveTimeEvents(String json_string);
-String GetModeArgs(int id);
-String GetModeArgsDefault(int id);
-void SaveModeArgs(int id, String args_string);
+void SaveTimeEvents(const char *json_string);
+const char *GetModeArgs(int id);
+const char *GetModeArgsDefault(int id);
+const char *GetModeArgsFilePath(const char *id);
+const char *GetModeArgsFilePath(int id);
+void SaveModeArgs(int id, const char *args_string);
 void FSBegin();
-String GetTimeEvents();
+const char *GetTimeEvents();
+bool FileExists(const char *path);
 // void Save
 
-String GetModeArgsFilePath(String id);
-String GetElementsFilePath(String lang, String id);
+const char *GetElementsFilePath(const char *lang, const char *id);

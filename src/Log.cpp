@@ -4,10 +4,16 @@
 
 Log *Log::Instance = 0;
 
-void Log::Println(String msg)
+void Log::Println(const char *toPrint)
 {
+    char msg[128] = "";
+
     if (gotTime)
-        msg = TimeManager::Instance->GetCurrentFormattedTime() + " " + msg;
+    {
+        strcat(msg, TimeManager::Instance->GetCurrentFormattedTime());
+        strcat(msg, " ");
+    }
+    strcat(msg, toPrint);
 
 #ifdef DEBUG_SERIAL
     Serial.println(msg);
@@ -36,10 +42,16 @@ void Log::Begin()
     while (LittleFS.exists(GetFileName(currentFileNumber)))
         currentFileNumber += 1;
 
-    sprintln("[DEBUG] Log File: " + GetFileName(currentFileNumber));
-    sprintln("[DEBUG] Reload cause: " +
-             ESP.getResetReason() + " " +
-             ESP.getResetInfo());
+    char *str = "[DEBUG] Log File: ";
+
+    strcat(str, GetFileName(currentFileNumber));
+    strcat(str, "\n");
+    strcat(str, "[DEBUG] Reload cause: ");
+    strcat(str, ESP.getResetReason().c_str());
+    strcat(str, " ");
+    strcat(str, ESP.getResetInfo().c_str());
+
+    sprintln(str);
 #endif
 }
 
@@ -52,12 +64,13 @@ Log::Log()
     Instance = this;
 }
 
-String Log::GetFileName(int id)
+const char *Log::GetFileName(int &id)
 {
-    return "/logs/log" + String(id) + ".txt";
-}
+    char result[32] = "";
 
-String Log::GetFileName(String id)
-{
-    return "/logs/log" + id + ".txt";
+    strcat(result, "/logs/log");
+    itoa(id, result + strlen(result), DEC);
+    strcat(result, ".txt");
+
+    return result;
 }

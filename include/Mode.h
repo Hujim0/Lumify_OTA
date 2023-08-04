@@ -5,24 +5,25 @@
 #include <ArduinoJson.h>
 #include <FileSystem.h>
 
-#define SPEED_ARG "speed"
-#define INTENSITY_ARG "intensity"
-#define LENGTH_ARG "length"
-#define REVERSED_ARG "reversed"
-#define COUNT_ARG "count"
-#define EDIT_ARG "edit"
-#define START_ARG "start"
-#define END_ARG "end"
-#define COLOR_ARG "color"
 class Mode
 {
 public:
+    const char *SPEED_ARG = "speed";
+    const char *INTENSITY_ARG = "intensity";
+    const char *LENGTH_ARG = "length";
+    const char *REVERSED_ARG = "reversed";
+    const char *COUNT_ARG = "count";
+    const char *EDIT_ARG = "edit";
+    const char *START_ARG = "start";
+    const char *END_ARG = "end";
+    const char *COLOR_ARG = "color";
+
     // pure virtual method
     virtual void update(CRGB *) = 0;
     virtual void update_args(const char *data) = 0;
-    virtual void update_arg(String arg, String value) = 0;
+    virtual void update_arg(const char *arg, const char *value) = 0;
 
-    static uint32_t toHex(String);
+    static uint32_t toHex(const char *);
     static float removeNegatives(float);
     static int removeNegatives(int);
     static void printCRGB(CRGB);
