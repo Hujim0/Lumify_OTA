@@ -66,5 +66,6 @@
         "lumify",
         "MDNS",
         "sprintln"
-    ]
+    ],
+    "cmake.sourceDirectory": "C:/code/Lumify_OTA/.pio/libdeps/esp12e/ArduinoJson"
 }

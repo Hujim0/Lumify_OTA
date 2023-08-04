@@ -336,17 +336,17 @@ class listElement {
     ) {
         this.div = div;
 
-        this.info_button_label = this.div.children[2];
+        this.info_button = this.div.children[2];
 
         //description---------------------------------
         if (
-            this.div.children[3].innerText == null || //description label
+            this.div.children[3].innerText == undefined || //description label
             this.div.children[3].innerText == ""
         ) {
-            this.info_button_label.hidden = true;
+            this.info_button.classList.toggle("hidden");
         } else {
             this.ConfigureInfoButton(
-                this.info_button_label,
+                this.info_button,
                 this.div.children[3],
                 info_inputs_array
             );
@@ -402,13 +402,13 @@ class listElement {
     }
 
     ConfigureInfoButton(
-        info_button_label_element,
+        info_button_element,
         description_element,
         info_descriptions_array,
         onToggle = null,
         props_to_checkbox = ""
     ) {
-        info_button_label_element.children[0]["info_button_id"] =
+        info_button_element.children[0]["info_button_id"] =
             info_descriptions_array.length;
 
         if (props_to_checkbox != "") {
@@ -416,25 +416,22 @@ class listElement {
             let prop = key_value_pair[0];
             let val = key_value_pair[1];
 
-            info_button_label_element.children[0][prop] = val;
+            info_button_element.children[0][prop] = val;
         }
-        info_button_label_element.children[0].addEventListener(
-            "input",
-            (event) => {
-                info_descriptions_array[
-                    event.target["info_button_id"]
-                ].classList.toggle("active");
+        info_button_element.children[0].addEventListener("input", (event) => {
+            info_descriptions_array[
+                event.target["info_button_id"]
+            ].classList.toggle("active");
 
-                if (onToggle != null)
-                    onToggle(
-                        event,
-                        info_descriptions_array[
-                            event.target["info_button_id"]
-                        ].classList.contains("active"),
-                        info_descriptions_array[event.target["info_button_id"]]
-                    );
-            }
-        );
+            if (onToggle != null)
+                onToggle(
+                    event,
+                    info_descriptions_array[
+                        event.target["info_button_id"]
+                    ].classList.contains("active"),
+                    info_descriptions_array[event.target["info_button_id"]]
+                );
+        });
 
         info_descriptions_array.push(description_element);
     }

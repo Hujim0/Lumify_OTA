@@ -161,14 +161,6 @@ void NetworkManager::TryReconnect()
 }
 bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 {
-
-    // if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
-    // {
-    //     WiFi.mode(WiFiMode_t::WIFI_AP_STA);
-    // }
-    // else
-    // {
-    // }
     WiFi.mode(WiFiMode_t::WIFI_STA);
 
 #ifdef DEBUG_WIFI_SETTINGS
@@ -187,7 +179,7 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     ESP.wdtDisable();
 
     // delay(200);
-    while (attempt < MAX_ATTEMPT_COUNT)
+    while (attempt <= MAX_ATTEMPT_COUNT)
     {
         sprintln("Attempt " + String(attempt));
 
@@ -208,13 +200,6 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 
         return false;
     }
-
-    // if (attempt >= MAX_ATTEMPT_COUNT)
-    // {
-    //     sprintln("[ERROR] Cant connect!");
-
-    //     return false;
-    // }
 
     sprintln(LOG_PREFIX + "success");
     // server setup
@@ -275,12 +260,26 @@ NetworkManager::NetworkManager()
 {
     Instance = this;
 
-    // WiFi.config(ip, gateway, subnet);
-
     stringPort = ":" + String(NetworkPort);
 
     if (NetworkPort == 80)
         stringPort = "";
 
-    // WiFi.setAutoReconnect(true);
+    WiFi.onWiFiModeChange([](const WiFiEventModeChange &event)
+                          { sprintln(LOG_PREFIX + "Switched Wifi mode: " + event.oldMode + " -> " + event.newMode);
+                          delay(200); });
+
+    onLostWifiConnectionHandler = [](const WiFiEventStationModeDisconnected &event)
+    {
+        sprintln(LOG_PREFIX + "Disconnected from Wifi: " + event.ssid);
+    };
+
+    WiFi.onStationModeDisconnected(onLostWifiConnectionHandler);
+
+    WiFi.setSleepMode(WiFiSleepType_t::WIFI_NONE_SLEEP);
+}
+
+void NetworkManager::OnLostWifiConnection(OnLostWifiConnectionHandler handler)
+{
+    onLostWifiConnectionHandler = handler;
 }

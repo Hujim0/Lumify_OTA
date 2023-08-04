@@ -21,7 +21,8 @@ void GetWifiCredentials(String *data)
 void SaveWifiCredentials(const char *ssid, const char *pw)
 {
     File file = LittleFS.open(WIFI_SETTINGS_PATH, "w");
-    file.write(String(String(ssid) + "\n").c_str());
+    file.write(ssid);
+    file.write("\n");
     file.write(pw);
 
     file.close();
@@ -29,13 +30,13 @@ void SaveWifiCredentials(const char *ssid, const char *pw)
 
 void SavePreferences(String preferences_json)
 {
-    File file = LittleFS.open(PREFRENCES_PATH, "w");
+    File file = LittleFS.open(PREFERENCES_PATH, "w");
     file.write(preferences_json.c_str());
     file.close();
 }
 void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preferences_json)
 {
-    File file = LittleFS.open(PREFRENCES_PATH, "w");
+    File file = LittleFS.open(PREFERENCES_PATH, "w");
     serializeJson(*preferences_json, file);
 
     file.close();
@@ -45,7 +46,7 @@ void SavePreferences(StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> *preference
 
 String LoadPreferences()
 {
-    File file = LittleFS.open(PREFRENCES_PATH, "r");
+    File file = LittleFS.open(PREFERENCES_PATH, "r");
     String data = file.readString();
     file.close();
     return data;

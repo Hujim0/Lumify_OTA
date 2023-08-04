@@ -2,7 +2,7 @@
 #define FILESYSTEMMAHAGER_H
 
 #define WIFI_SETTINGS_PATH "/wifi_settings.txt"
-#define PREFRENCES_PATH "/preferences.json"
+#define PREFERENCES_PATH "/preferences.json"
 
 #include <LittleFS.h>
 #include <ArduinoJson.h>

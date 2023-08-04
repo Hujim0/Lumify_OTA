@@ -25,7 +25,7 @@ typedef std::function<void(int)> OnNewClientHandler;
 typedef std::function<void()> OnConnectionLostHandler;
 typedef std::function<void()> OnConnectionSuccessfulHandler;
 typedef std::function<void(const char *ssid, const char *pw)> OnNewCredentialsHandler;
-
+typedef std::function<void(const WiFiEventStationModeDisconnected &)> OnLostWifiConnectionHandler;
 const IPAddress ip(192, 168, 0, 146);
 const IPAddress gateway(192, 168, 0, 146);
 const IPAddress subnet(255, 255, 255, 0);
@@ -37,6 +37,7 @@ private:
     OnConnectionLostHandler onConnectionLostHandler = NULL;
     OnConnectionSuccessfulHandler onConnectionSuccessfulHandler = NULL;
     OnNewCredentialsHandler onNewCredentialsHandler = NULL;
+    OnLostWifiConnectionHandler onLostWifiConnectionHandler = NULL;
 
     String buffer;
     uint64_t buffer_size;
@@ -62,6 +63,7 @@ public:
     void OnConnectionLost(OnConnectionLostHandler);
     void OnConnectionSuccessful(OnConnectionSuccessfulHandler);
     void OnNewCredentials(OnNewCredentialsHandler);
+    void OnLostWifiConnection(OnLostWifiConnectionHandler);
     void TryReconnect();
     void SentTextToClient(int client_id, const char *msg);
     void SentTextToAll(const char *msg);

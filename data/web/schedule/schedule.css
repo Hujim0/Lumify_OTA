@@ -194,14 +194,14 @@
     }
 
     .list > div {
-        grid-template-columns: 1fr 2fr 1fr !important;
+        grid-template-columns: 1fr 2fr 2fr !important;
         column-gap: 7px !important;
         overflow-x: hidden !important;
         padding-right: 5px !important;
         padding-left: 10px !important;
     }
     .list > div > label:first-child {
-        margin-left: 10px !important;
+        margin-left: 30px !important;
     }
 
     .full-screen > div {
