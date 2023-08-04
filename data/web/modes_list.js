@@ -296,7 +296,10 @@ function SendTime() {
     const query_string =
         "/time?epoch=" +
         String(
-            date.getHours() * 3600 + date.getMinutes() * 60 + date.getSeconds()
+            date.getHours() * 3600 +
+                date.getMinutes() * 60 +
+                date.getSeconds() -
+                2 //correction for the post request latency
         ) +
         "&dayoftheweek=" +
         String(date.getDay());

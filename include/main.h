@@ -1,5 +1,4 @@
-#ifndef MAIN_H
-#define MAIN_H
+#pragma once
 
 #define NUMPIXELS 300
 
@@ -23,5 +22,3 @@ void onTimeEventFired(float, EventType eventType, int value, String args);
 void SetupCaptivePortal();
 void OnConnected();
 void NewCredentials(const char *ssid, const char *pw);
-
-#endif

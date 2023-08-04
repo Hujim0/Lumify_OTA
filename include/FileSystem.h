@@ -1,5 +1,4 @@
-#ifndef FILESYSTEMMAHAGER_H
-#define FILESYSTEMMAHAGER_H
+#pragma once
 
 #define WIFI_SETTINGS_PATH "/wifi_settings.txt"
 #define PREFERENCES_PATH "/preferences.json"
@@ -24,5 +23,3 @@ String GetTimeEvents();
 
 String GetModeArgsFilePath(String id);
 String GetElementsFilePath(String lang, String id);
-
-#endif

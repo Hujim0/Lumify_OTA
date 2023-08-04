@@ -1,5 +1,4 @@
-#ifndef TIMEEVENT_H
-#define TIMEEVENT_H
+#pragma once
 
 #include <Arduino.h>
 
@@ -29,5 +28,3 @@ public:
     TimeEvent(int epoch, float transition, EventType type, int value, String args);
     TimeEvent();
 };
-
-#endif

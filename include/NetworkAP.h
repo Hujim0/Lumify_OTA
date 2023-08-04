@@ -1,5 +1,4 @@
-#ifndef NETWORK_AP
-#define NETWORK_AP
+#pragma once
 
 #include <NetworkManager.h>
 #include <DNSServer.h>
@@ -18,5 +17,3 @@ public:
 
     void update();
 };
-
-#endif

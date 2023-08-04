@@ -18,7 +18,7 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDoc
 
 void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 {
-    if (isSetuped)
+    if (isReady)
     {
         MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
         return;
@@ -34,14 +34,14 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
     minutes = (epoch_time_seconds % 3600) / 60;
     seconds = epoch_time_seconds % 60;
 
-    isSetuped = true;
+    isReady = true;
 
     sprintln(LOG_PREFIX + "Got time! " + GetCurrentFormattedTime() + ", day of the week: " + String(dayOfTheWeek));
 }
 
 void TimeManager::Update()
 {
-    if (!isSetuped)
+    if (!isReady)
         return;
 
     epoch_time_day_seconds = (int)(((MillisOffset + millis()) / 1000UL) % 86400UL);
@@ -105,7 +105,7 @@ void TimeManager::UpdateSeconds()
 
 String TimeManager::GetCurrentFormattedTime()
 {
-    if (!isSetuped)
+    if (!isReady)
         return "unknown";
 
     String time = "";

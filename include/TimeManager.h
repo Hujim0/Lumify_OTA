@@ -1,5 +1,4 @@
-#ifndef TIMEMANAGER_H
-#define TIMEMANAGER_H
+#pragma once
 
 #include <Arduino.h>
 #include <ModeHandler.h>
@@ -20,7 +19,7 @@ private:
     OnEventFired onEventFired;
 
     // int OneMinuteCounter = 0;
-    bool isSetuped = false;
+    bool isReady = false;
 
     int seconds;
     void UpdateSeconds();
@@ -48,5 +47,3 @@ public:
 
     static TimeManager *Instance;
 };
-
-#endif

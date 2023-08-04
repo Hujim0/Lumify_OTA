@@ -1,5 +1,4 @@
-#ifndef STATICMODE_H
-#define STATICMODE_H
+#pragma once
 
 #include <Mode.h>
 
@@ -17,5 +16,3 @@ public:
     StaticMode(const char *);
     ~StaticMode();
 };
-
-#endif

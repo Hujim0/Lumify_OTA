@@ -1,5 +1,4 @@
-#ifndef SKYMODE_H
-#define SKYMODE_H
+#pragma once
 
 #include <Mode.h>
 
@@ -35,5 +34,3 @@ public:
     SkyMode(const char *);
     ~SkyMode();
 };
-
-#endif
