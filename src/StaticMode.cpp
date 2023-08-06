@@ -23,7 +23,8 @@ void StaticMode::update_args(const char *data)
     StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> args;
     deserializeJson(args, data);
 
-    color = toHex(args[COLOR_ARG].as<const char *>());
+    // color = toHex(args[COLOR_ARG].as<const char *>());
+    color = CRGB::White;
 
     args.garbageCollect();
 }

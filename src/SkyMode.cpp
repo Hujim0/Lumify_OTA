@@ -28,7 +28,7 @@ void SkyMode::update(CRGB *leds)
 
     SecondsSinceSunriseStart = (float)(millis() - sunrise_start_time) / (1000.0F * (2.1F - speed));
 
-    // initial sunrise ligtht
+    // initial sunrise light
     if (SecondsSinceSunriseStart <= SECONDS_BEFORE_SKY_SHOWS)
     {
         ShowSunriseLight(SecondsSinceSunriseStart, leds);

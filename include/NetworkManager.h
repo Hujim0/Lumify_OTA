@@ -11,11 +11,11 @@
 
 #define DEFAULT_PORT 80
 
-const char *LOG_PREFIX = "[Network] ";
-
 #define ATTEMPT_DURATION 5000
 
 const int MAX_ATTEMPT_COUNT = 5;
+
+#define LOG_PREFIX "[Network] "
 
 #define DEBUG_WIFI_SETTINGS
 
