@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RAINBOWMODE_H
+#define RAINBOWMODE_H
 
 #include <Mode.h>
 
@@ -20,3 +21,5 @@ public:
     RainbowMode(const char *);
     ~RainbowMode();
 };
+
+#endif

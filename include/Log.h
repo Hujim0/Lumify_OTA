@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOG_H
+#define LOG_H
 
 #include <ArduinoJson.h>
 #include <LittleFS.h>
@@ -33,3 +34,5 @@ public:
 
     Log();
 };
+
+#endif

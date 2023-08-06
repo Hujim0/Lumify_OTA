@@ -18,7 +18,7 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDoc
 
 void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 {
-    if (isReady)
+    if (isSetuped)
     {
         MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
         return;
@@ -34,7 +34,7 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
     minutes = (epoch_time_seconds % 3600) / 60;
     seconds = epoch_time_seconds % 60;
 
-    isReady = true;
+    isSetuped = true;
 
     char msg[50] = "";
 
@@ -51,7 +51,7 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 
 void TimeManager::Update()
 {
-    if (!isReady)
+    if (!isSetuped)
         return;
 
     epoch_time_day_seconds = (int)(((MillisOffset + millis()) / 1000UL) % 86400UL);
@@ -121,7 +121,7 @@ void TimeManager::UpdateSeconds()
 
 const char *TimeManager::GetCurrentFormattedTime()
 {
-    if (!isReady)
+    if (!isSetuped)
         return "unknown";
 
     char res[10] = "";
