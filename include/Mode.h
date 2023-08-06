@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODE_H
+#define MODE_H
 
 #include <FastLED.h>
 #include <main.h>
@@ -29,3 +30,5 @@ public:
     static void printCRGB(CRGB);
     virtual ~Mode() {}
 };
+
+#endif

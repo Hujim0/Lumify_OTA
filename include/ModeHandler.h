@@ -1,4 +1,5 @@
-#pragma once
+#ifndef MODEHANDLER_H
+#define MODEHANDLER_H
 
 #include <Mode.h>
 
@@ -30,3 +31,5 @@ public:
     ModeHandler();
     ~ModeHandler();
 };
+
+#endif

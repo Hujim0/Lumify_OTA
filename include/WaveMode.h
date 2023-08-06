@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WAVEMODE_H
+#define WAVEMODE_H
 
 #include <Mode.h>
 
@@ -23,3 +24,5 @@ public:
     WaveMode(const char *);
     ~WaveMode();
 };
+
+#endif
