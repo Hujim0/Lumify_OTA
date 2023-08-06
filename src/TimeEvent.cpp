@@ -32,20 +32,20 @@ TimeEvent::TimeEvent() {}
 
 const char *TimeEvent::stringify()
 {
-    char result[100] = "";
+    char *result = (char *)malloc(100);
 
     strcat(result, "TimeEvent at ");
     strcat(result, TimeManager::FormatTime(epochTime));
     strcat(result, ", type: ");
-    if (eventType = EventType::Brightness)
+    if (eventType == EventType::Brightness)
     {
         strcat(result, "Brightness, value: ");
-        itoa(value, strchr(result, NULL), DEC);
+        itoa(value, strchr(result, 0), DEC);
     }
     else
     {
         strcat(result, "Mode, id: ");
-        itoa(value, strchr(result, NULL), DEC);
+        itoa(value, strchr(result, 0), DEC);
         strcat(result, ", args: \"");
         strcat(result, args);
         strcat(result, "\"");

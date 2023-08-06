@@ -48,6 +48,7 @@ void setup()
   sprintln("[ESP] loaded");
 
   ApplyPreferences(LoadPreferences());
+
   SetupFastLED();
 
   network.OnConnectionSuccessful(OnConnected);
@@ -429,7 +430,7 @@ void minuteSecondTimer()
   {
     char msg[64] = "[ESP] Available ram: ";
 
-    itoa(ESP.getFreeHeap(), strchr(msg, NULL), DEC);
+    itoa(ESP.getFreeHeap(), strchr(msg, 0), DEC);
     strcat(msg, " bytes");
     sprintln(msg);
   }

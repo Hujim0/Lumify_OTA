@@ -19,7 +19,7 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
         char msg[64] = "";
 
         strcat(msg, "[Websocket] client #");
-        itoa(client->id(), strchr(msg, NULL), DEC);
+        itoa(client->id(), strchr(msg, 0), DEC);
         strcat(msg, " connected from ");
         strcat(msg, client->remoteIP().toString().c_str());
 
@@ -73,9 +73,9 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
             char msg[128] = "";
 
             strcat(msg, "[Websocket] Partial message: ");
-            itoa(buffer_size, strchr(msg, NULL), DEC);
+            itoa(buffer_size, strchr(msg, 0), DEC);
             strcat(msg, " / ");
-            itoa(info->len, strchr(msg, NULL), DEC);
+            itoa(info->len, strchr(msg, 0), DEC);
             strcat(msg, " \"");
             strcat(msg, (char *)data);
             strcat(msg, "\" --endln");
@@ -89,7 +89,7 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
         onNewMessageHandler(buffer.c_str());
 
         buffer_size = (uint64_t)0;
-        buffer[0] = NULL;
+        buffer[0] = 0;
         buffer = "";
 
         return;
@@ -223,6 +223,7 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         strcpy(msg, LOG_PREFIX);
         strcat(msg, "Wifi credentials: ");
         strcat(msg, ssid);
+        strcat(msg, " ");
         strcat(msg, pw);
 
         sprintln(msg);
@@ -262,7 +263,6 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         }
         ESP.wdtFeed();
         attempt += 1;
-        delay(200);
     }
 
     if (attempt >= MAX_ATTEMPT_COUNT)
@@ -389,9 +389,7 @@ NetworkManager::NetworkManager()
         strcat(msg, " -> ");
         strcat(msg, stringifyWifiMode(event.newMode));
 
-        sprintln(msg);
-    
-        delay(200); });
+        sprintln(msg); });
 
     // onLostWifiConnectionHandler = [](const WiFiEventStationModeDisconnected &event)
     // {
