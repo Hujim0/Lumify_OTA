@@ -29,6 +29,8 @@ void ModeHandler::ChangeMode(int id, const char *args)
 
     current_mode_id = id;
 
+    free(current_mode);
+
     switch (id)
     {
     case 0:
@@ -45,7 +47,7 @@ void ModeHandler::ChangeMode(int id, const char *args)
         return;
 
     default:
-        ChangeMode(0, GetModeArgsDefault(0));
+        ChangeMode(0, GetModeArgsDefault(0).c_str());
         return;
     }
 }

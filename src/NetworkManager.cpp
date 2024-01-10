@@ -16,12 +16,11 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
     {
     case WS_EVT_CONNECT:
     {
-        char msg[64] = "";
+        char msg[128];
 
-        strcat(msg, "[Websocket] client #");
-        itoa(client->id(), strchr(msg, 0), DEC);
-        strcat(msg, " connected from ");
-        strcat(msg, client->remoteIP().toString().c_str());
+        snprintf(msg, sizeof(msg), "[Websocket] client #%i connected from %s",
+                 (int)client->id(),
+                 client->remoteIP().toString().c_str());
 
         sprintln(msg);
     }
@@ -34,9 +33,8 @@ static void onNewEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, Aws
     {
         char msg[64] = "";
 
-        strcat(msg, "[Websocket] client #");
-        itoa(client->id(), strchr(msg, 0), DEC);
-        strcat(msg, "disconnected");
+        snprintf(msg, sizeof(msg), "[Websocket] client #%i disconnected",
+                 (int)client->id());
 
         sprintln(msg);
     }
@@ -70,15 +68,12 @@ void NetworkManager::handleWebSocketMessage(void *arg, uint8_t *data, size_t len
         buffer_size += len;
         buffer += (char *)data;
         {
-            char msg[128] = "";
+            char msg[128];
 
-            strcat(msg, "[Websocket] Partial message: ");
-            itoa(buffer_size, strchr(msg, 0), DEC);
-            strcat(msg, " / ");
-            itoa(info->len, strchr(msg, 0), DEC);
-            strcat(msg, " \"");
-            strcat(msg, (char *)data);
-            strcat(msg, "\" --endln");
+            snprintf(msg, sizeof(msg), "[Websocket] Partial message: %i / %i \"%s\" --endln",
+                     (int)buffer_size,
+                     (int)info->len,
+                     (char *)data);
 
             sprintln(msg);
         }
@@ -107,10 +102,9 @@ void NetworkManager::SentTextToClient(int id, const char *data)
 void NetworkManager::SentTextToAll(const char *data)
 {
     {
-        char msg[128] = "";
+        char msg[128];
 
-        strcat(msg, "[Websocket] Texted to all: ");
-        strcat(msg, data);
+        snprintf(msg, sizeof(msg), "[Websocket] Texted to all: %s", data);
 
         sprintln(data);
     }
@@ -187,30 +181,12 @@ void NetworkManager::TryReconnect()
     if (WiFi.getMode() == WiFiMode_t::WIFI_AP)
         return;
 
-    {
-        char msg[32] = "";
-
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "Trying to reconnect...");
-
-        sprintln(msg);
-    }
-
-    char msg[32] = "";
-
-    strcpy(msg, LOG_PREFIX);
+    sprintln(LOG_PREFIX "Trying to reconnect...");
 
     if (WiFi.reconnect())
-    {
-
-        strcat(msg, "Success!");
-    }
+        sprintln(LOG_PREFIX "Success!");
     else
-    {
-        strcat(msg, "Cant reconnect!");
-    }
-
-    sprintln(msg);
+        sprintln(LOG_PREFIX "Cant reconnect!");
 }
 bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 {
@@ -218,25 +194,17 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
 
 #ifdef DEBUG_WIFI_SETTINGS
     {
-        char msg[100] = "";
+        char msg[128];
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "Wifi credentials: ");
-        strcat(msg, ssid);
-        strcat(msg, " ");
-        strcat(msg, pw);
+        snprintf(msg, sizeof(msg), LOG_PREFIX "Wifi credentials: %s %s",
+                 ssid,
+                 pw);
 
         sprintln(msg);
     }
 #endif
-    {
-        char msg[32] = "";
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "Connecting to Wifi...");
-
-        sprintln(msg);
-    }
+    sprintln(LOG_PREFIX "Connecting to Wifi...");
 
     int attempt = 1;
 
@@ -245,12 +213,9 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     while (attempt <= MAX_ATTEMPT_COUNT)
     {
         {
-            char msg[32] = "";
+            char msg[32];
 
-            strcpy(msg, LOG_PREFIX);
-            strcat(msg, "Attempt ");
-            itoa(attempt, strchr(msg, 0), DEC);
-            strcat(msg, "...");
+            snprintf(msg, sizeof(msg), LOG_PREFIX "Attempt %i...", attempt);
 
             sprintln(msg);
         }
@@ -272,14 +237,8 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
         return false;
     }
 
-    {
-        char msg[32] = "";
+    sprintln(LOG_PREFIX "success!");
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "success");
-
-        sprintln(msg);
-    }
     // server setup
 
     _server.begin();
@@ -293,23 +252,15 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     _webSocket.closeAll();
     // print server url
 
-    {
-        char _url[64] = "";
-
-        strcpy(_url, "http://");
-        strcat(_url, WiFi.localIP().toString().c_str());
-        strcat(_url, stringPort);
-
-        url = _url;
-    }
+    snprintf(url, sizeof(url), "http://%s%s",
+             WiFi.localIP().toString().c_str(),
+             stringPort);
 
     {
-        char msg[128] = "";
+        char msg[256];
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "HTTP server started at \"");
-        strcat(msg, url);
-        strcat(msg, "\"");
+        snprintf(msg, sizeof(msg), LOG_PREFIX "HTTP server started at \"%s\"", url);
+
         sprintln(msg);
     }
 
@@ -320,14 +271,11 @@ bool NetworkManager::BeginSTA(const char *ssid, const char *pw)
     }
 
     {
-        char msg[128] = "";
+        char msg[256];
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "mDNS responder started: \"http://");
-        strcat(msg, DNS_SERVER_URL);
-        strcat(msg, ".local");
-        strcat(msg, stringPort);
-        strcat(msg, "\"");
+        snprintf(msg, sizeof(msg),
+                 LOG_PREFIX "mDNS responder started: \"http://" DNS_SERVER_URL ".local%s\"",
+                 stringPort);
 
         sprintln(msg);
     }
@@ -368,26 +316,24 @@ NetworkManager::NetworkManager()
     Instance = this;
 
     if (NetworkPort == 80)
-        stringPort = "";
+
+        strcpy(stringPort, "");
     else
     {
-        char port[10] = "";
+        char port[10];
 
-        strcpy(port, ":");
-        itoa(NetworkPort, strchr(port, 0), DEC);
+        snprintf(port, sizeof(port), ":%i", NetworkPort);
 
-        stringPort = port;
+        strcpy(stringPort, port);
     }
 
     WiFi.onWiFiModeChange([](const WiFiEventModeChange &event)
                           {
-        char msg[128] = "";
+        char msg[128];
 
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "Switched Wifi mode: ");
-        strcat(msg, stringifyWifiMode(event.oldMode));
-        strcat(msg, " -> ");
-        strcat(msg, stringifyWifiMode(event.newMode));
+        snprintf(msg, sizeof(msg), LOG_PREFIX "Switched Wifi mode: %s -> %s",
+                 stringifyWifiMode(event.oldMode),
+                 stringifyWifiMode(event.newMode));
 
         sprintln(msg); });
 

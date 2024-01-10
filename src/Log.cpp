@@ -6,18 +6,18 @@ Log *Log::Instance = 0;
 
 void Log::Println(const char *toPrint)
 {
-    char msg[128] = "";
+    char msg[256] = "";
 
-    // if (gotTime)
-    // {
-    //     // strcpy(msg, TimeManager::Instance->GetCurrentFormattedTime());
-    //     // strcat(msg, " ");
-    //     strcat(msg, toPrint);
-    // }
-    // else
-    // {
-    strcpy(msg, toPrint);
-    // }
+    if (gotTime)
+    {
+        String time = TimeManager::Instance->GetCurrentFormattedTime();
+        snprintf(msg, sizeof(msg), "%s %s", time.c_str(), toPrint);
+        time[0] = 0;
+    }
+    else
+    {
+        strncpy(msg, toPrint, sizeof(msg));
+    }
 
 #ifdef DEBUG_SERIAL
     Serial.println(msg);
@@ -27,7 +27,7 @@ void Log::Println(const char *toPrint)
     if (!SaveLogs)
         return;
 
-    currentFile = LittleFS.open(GetFileName(currentFileNumber), "a");
+    currentFile = LittleFS.open(currentFilePath, "a");
     currentFile.println(msg);
     currentFile.close();
 
@@ -43,25 +43,34 @@ void Log::Begin()
     if (!SaveLogs)
         return;
 
-    const char *path = GetFileName(currentFileNumber);
+    int last_file_number = 0;
 
-    while (LittleFS.exists(path))
+    char path[MAX_PATH_LENGTH];
+
+    while (last_file_number < 100)
     {
-        currentFileNumber += 1;
-        free((void *)path);
-        path = GetFileName(currentFileNumber);
+        {
+            snprintf(path, sizeof(path), "/logs/log%i.txt", last_file_number);
+
+            if (!FileExists(path))
+                break;
+        }
+
+        last_file_number += 1;
+    }
+    strncpy(currentFilePath, path, sizeof(currentFilePath));
+
+    {
+        char str[128] = "[DEBUG] Log File: ";
+
+        snprintf(str, sizeof(str), "[DEBUG] Log File: %s\n[DEBUG] Reload cause: %s %s",
+                 path,
+                 ESP.getResetReason().c_str(),
+                 ESP.getResetInfo().c_str());
+
+        sprintln(str);
     }
 
-    char str[128] = "[DEBUG] Log File: ";
-
-    strcat(str, path);
-    strcat(str, "\n");
-    strcat(str, "[DEBUG] Reload cause: ");
-    strcat(str, ESP.getResetReason().c_str());
-    strcat(str, " ");
-    strcat(str, ESP.getResetInfo().c_str());
-
-    sprintln(str);
 #endif
 }
 
@@ -69,18 +78,20 @@ Log::Log()
 {
     SaveLogs = true;
     gotTime = false;
-    currentFileNumber = 0;
 
     Instance = this;
 }
 
-const char *Log::GetFileName(int &id)
+String Log::GetFileName(int id)
 {
-    char *result = (char *)malloc(32);
+    String res((char *)0);
+    res.reserve(MAX_PATH_LENGTH - 1);
+    {
+        char path[MAX_PATH_LENGTH];
+        snprintf(path, sizeof(path), "/logs/log%i.txt", id);
 
-    strcat(result, "/logs/log");
-    itoa(id, result + strlen(result), DEC);
-    strcat(result, ".txt");
+        res = path;
+    }
 
-    return result;
+    return res;
 }

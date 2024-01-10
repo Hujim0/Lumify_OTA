@@ -5,7 +5,7 @@
 #include <ModeHandler.h>
 #include <TimeEvent.h>
 
-typedef std::function<void()> OneMinuteTimer;
+typedef std::function<void()> Timer;
 typedef std::function<void(float, EventType, int, const char *)> OnEventFired;
 
 class TimeManager
@@ -19,7 +19,7 @@ private:
     OnEventFired onEventFired;
 
     // int OneMinuteCounter = 0;
-    bool isSetuped = false;
+    bool isReady = false;
 
     uint8_t seconds;
     void UpdateSeconds();
@@ -34,11 +34,13 @@ public:
     void Setup(int epoch_time_day_seconds, int dayOfTheWeek);
     void Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> &preferences);
     void Update();
-    const char *GetCurrentFormattedTime();
     int GetEpochTime();
-    static const char *FormatTime(int);
 
-    OneMinuteTimer timer;
+    String GetCurrentFormattedTime();
+    static String FormatTime(int);
+
+    Timer OneMinuteTimer;
+    Timer TenSecondsTimer;
 
     void AddTimeEvents(TimeEvent *events, size_t count);
     void AddTimeEventsFromJson(JsonVariant doc);

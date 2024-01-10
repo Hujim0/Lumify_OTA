@@ -23,7 +23,7 @@ public:
     float transition;
     const char *args;
 
-    const char *stringify();
+    String stringify();
 
     TimeEvent(int epoch, float transition, EventType type, int value, const char *args);
     TimeEvent();

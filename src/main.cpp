@@ -31,7 +31,7 @@ ModeHandler modeHandler;
 NetworkManager network = NetworkManager();
 NetworkAP network_ap = NetworkAP();
 TimeManager timeManager;
-const char *currentLanguage = "en";
+char currentLanguage[10] = "en";
 
 void setup()
 {
@@ -46,8 +46,11 @@ void setup()
   _log.Begin();
 
   sprintln("[ESP] loaded");
-
-  ApplyPreferences(LoadPreferences());
+  {
+    String preferences_string = LoadPreferences();
+    ApplyPreferences(preferences_string.c_str());
+    preferences_string[0] = 0;
+  }
 
   SetupFastLED();
 
@@ -62,11 +65,15 @@ void OnConnected()
 {
   AddServerHandlers();
 
-  modeHandler.ChangeMode(
-      modeHandler.current_mode_id,
-      GetModeArgs(modeHandler.current_mode_id));
+  {
+    String args = GetModeArgs(modeHandler.current_mode_id);
+    modeHandler.ChangeMode(modeHandler.current_mode_id, args.c_str());
 
-  timeManager.timer = minuteSecondTimer;
+    args[0] = 0;
+  }
+
+  timeManager.OneMinuteTimer = minuteTimer;
+  timeManager.TenSecondsTimer = tenSecondTimer;
 }
 
 void loop()
@@ -103,30 +110,21 @@ void ConnectToWifi()
   if (wifi_data[0] != NULL && wifi_data[0] != "")
   {
     if (!network.BeginSTA(wifi_data[0].c_str(), wifi_data[1].c_str()))
-    {
-      char msg[128] = "";
-
-      strcpy(msg, LOG_PREFIX);
-      strcat(msg, "Failed to connect! Falling back to AP...");
-
-      sprintln(msg);
-    }
+      sprintln(LOG_PREFIX "Failed to connect! Falling back to AP...");
     else
       return;
   }
   else
   {
-    char msg[128] = "";
-
-    strcpy(msg, LOG_PREFIX);
-    strcat(msg, "Credentials not found! Starting AP...");
-
-    sprintln(msg);
+    sprintln(LOG_PREFIX "Credentials not found! Starting AP...");
   }
 
   SetupCaptivePortal();
 
   network.OnNewCredentials(NewCredentials);
+
+  wifi_data[0][0] = 0;
+  wifi_data[1][0] = 0;
 }
 
 void NewCredentials(const char *ssid, const char *pw)
@@ -187,9 +185,9 @@ void AddServerHandlers()
   // // global
   network.AddWebPageHandler("/", [](AsyncWebServerRequest *request)
                             { 
-    char uri[32] = "/";
-    strcat(uri, currentLanguage);
-    strcat(uri, "/home");
+    char uri[64];
+
+    snprintf(uri, sizeof(uri), "/%s/home.json", currentLanguage);
 
     request->redirect(uri); });
 
@@ -199,122 +197,140 @@ void AddServerHandlers()
 
   network.AddWebPageHandler("/localization", [](AsyncWebServerRequest *request)
                             {     
-    char uri[32] = "/modes/elements/";
-    strcat(uri, currentLanguage);
-    strcat(uri, "/localization.json");
+                              char uri[64];
+                              snprintf(uri, 
+                                      sizeof(uri), 
+                                      "/modes/elements/%s/localization.json", 
+                                      currentLanguage);
 
-    request->send(
-        request->beginResponse(LittleFS, uri, "text/json")); });
+                              request->send(
+                                  request->beginResponse(
+                                    LittleFS, 
+                                    uri, 
+                                    "text/json")); });
 
   network.AddWebPageHandler("/mode", [](AsyncWebServerRequest *request)
                             {
-    int id = request->arg("id").toInt();
-    const char* args = GetModeArgs(id);
+                              int id = request->arg("id").toInt();
 
-    if (strcmp(args, ""))
-    {
-      {
-        char msg[64] = "[ERROR] Invalid mode id: ";
-        itoa(id, strchr(msg, 0), DEC);
-        sprintln(msg);
-      }
+                              char args_string[MAX_ARGS_LENGTH] = "";
 
-      request->send(404);
-      return;
-    }
+                              {
+                                String args = GetModeArgs(id);
 
-    if (request->hasArg("change"))
-    {
-      modeHandler.ChangeMode(id, args);
-    }
-    if (request->hasArg("save"))
-    {
-      // SaveModeArgs(id, args);
+                                strncpy(args_string, args.c_str(), sizeof(args_string));
+                                args[0] = 0;
+                              }
 
-      StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-      deserializeJson(preferences, LoadPreferences());
-      preferences["mode"] = id;
-      SavePreferences(&preferences);
-    }
+                              if (strcmp(args_string, "") == 0)
+                              {
+                                {
+                                  char msg[64];
+                                  snprintf(msg, sizeof(msg), "[ERROR] Invalid mode id: %i", id);
+                                  sprintln(msg);
+                                }
 
-    request->send(
-        request->beginResponse(HTTP_POST, "text/json", args)); });
+                                request->send(404);
+                                return;
+                              }
+
+                              if (request->hasArg("change"))
+                              {
+                                modeHandler.ChangeMode(id, args_string);
+                              }
+                              if (request->hasArg("save"))
+                              {
+                                SaveModeArgs(id, args_string);
+
+                                StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+                                deserializeJson(preferences, LoadPreferences());
+                                preferences["mode"] = id;
+                                SavePreferences(&preferences);
+                              }
+
+                              request->send(
+                                  request->beginResponse(
+                                    HTTP_POST, 
+                                    "text/json", 
+                                    args_string)); });
 
   network.AddJSONBodyHandler("/time_events", [](AsyncWebServerRequest *request, JsonVariant &json)
                              {
-    const char* json_string = "";
                         
-    {
-      String _json_string;
-      serializeJson(json, _json_string);
-      json_string = _json_string.c_str();
-      _json_string[0] = 0;
-    }
+                              {
+                                String json_string;
+                                serializeJson(json, json_string);
+                                SaveTimeEvents(json_string.c_str());
+                                json_string[0] = 0;
+                              }
+                              
+                              {
+                                timeManager.AddTimeEventsFromJson(json);
 
-    SaveTimeEvents(json_string);
-
-    timeManager.AddTimeEventsFromJson(json);
-
-    json.clear();
-    
-    request->send(200); });
+                                json.clear();
+                              }
+                              
+                              request->send(200); });
 
   network.AddJSONBodyHandler("/mode", [](AsyncWebServerRequest *request, JsonVariant &json)
                              {
-    int id = request->arg("id").toInt();
+                              int id = request->arg("id").toInt();
 
-    const char *json_string = "";
+                              char json_string[256] = "";
 
-    {
-      String _json_string;
-      serializeJson(json, _json_string);
-      json_string = _json_string.c_str();
-      _json_string[0] = 0;
-    }
+                              {
+                                String _json_string((char *)0);
+                                serializeJson(json, _json_string);
+                                json.clear();
+                                strncpy(json_string, _json_string.c_str(), sizeof(json_string));
+                                _json_string[0] = 0;
+                              }                                    
 
-    json.clear();
-          
+                              if (request->hasArg("save"))
+                              {
+                                SaveModeArgs(id, json_string);
+                              }
 
-    if (request->hasArg("save"))
-    {
-      SaveModeArgs(id, json_string);
-    }
+                              if (modeHandler.current_mode_id != id)
+                              {
+                                modeHandler.ChangeMode(id, json_string);
 
-    if (modeHandler.current_mode_id != id)
-    {
-      modeHandler.ChangeMode(id, json_string);
+                                if (request->hasArg("save"))
+                                {
+                                  StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+                                  deserializeJson(preferences, LoadPreferences());
+                                  preferences["mode"] = id;
+                                  SavePreferences(&preferences);
+                                }
+                              }
 
-      if (request->hasArg("save"))
-      {
-        StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-        deserializeJson(preferences, LoadPreferences());
-        preferences["mode"] = id;
-        SavePreferences(&preferences);
-      }
-    }
+                              modeHandler.UpdateArgs(json_string);
 
-    modeHandler.UpdateArgs(json_string);
-
-    request->send(200); });
+                              request->send(200); });
 
   network.AddWebPageHandler("/elements", [](AsyncWebServerRequest *request)
                             {
-    const char* path = GetElementsFilePath(currentLanguage, request->arg("id").c_str());
+                              char path[64] = "";
+                              {
+                                String path_string = GetElementsFilePath(currentLanguage, request->arg("id").c_str());
+                                strncpy(path, path_string.c_str(), sizeof(path));
+                                path_string[0] = 0;
+                              }
 
-    if (!FileExists(path))
-    {
-      {
-        char msg[64] = "[ERROR] Not found elements file! id=";
-        strcat(msg, request->arg("id").c_str());
+                              if (!FileExists(path))
+                                {
+                                {
+                                  char msg[64];
+                                  snprintf(msg, sizeof(msg), "[ERROR] Not found elements file! id: %s", request->arg("id").c_str());
+                                  sprintln(msg);
+                                }
 
-        sprintln(msg);
-      }
-      request->send(404);
-      return;
-    }
+                                request->send(404);
+                                return;
+                              }
 
-    request->send(
-        request->beginResponse(LittleFS, path, "text/json")); });
+                              request->send(
+                                  request->beginResponse(LittleFS, path, "text/json")); });
 
   network.AddWebPageHandler("/preferences", [](AsyncWebServerRequest *request)
                             { request->send(
@@ -322,73 +338,93 @@ void AddServerHandlers()
 
   network.AddWebPageHandler("/changelang", [](AsyncWebServerRequest *request)
                             {
-    ChangeLanguage(request->arg("lang").c_str());
-    request->redirect("/" + request->arg("lang") + "/home"); });
+                              char lang[10] = "";
+                              {
+                                strncpy(lang, request->arg("lang").c_str(), sizeof(lang));
+                                ChangeLanguage(lang);
+                              }
+
+                              char uri[32] = "";
+                              
+                              snprintf(uri, sizeof(uri), "/%s/home", lang);
+
+                              request->redirect(uri); });
 
   network.AddWebPageHandler("/log", [](AsyncWebServerRequest *request)
                             {
-    int id = 0;
+                              char file_name[64] = "";
+                              
+                              if (request->hasArg("id"))
+                              {
+                                String file_name_string = _log.GetFileName(request->arg("id").toInt());
+                                strncpy(file_name, file_name_string.c_str(), sizeof(file_name));
+                                file_name_string[0] = 0;
+                              }
+                              else
+                              {
+                                strncpy(file_name, _log.currentFilePath ,sizeof(file_name));
+                              }
 
-    if (request->hasArg("id"))
-      id = request->arg("id").toInt();
-    else
-      id = _log.currentFileNumber;
+                              if (!FileExists(file_name))
+                              {
+                                request->send(404);
+                                return;
+                              }
 
-    const char* FileName = _log.GetFileName(id);
-
-    if (!FileExists(FileName))
-    {
-      request->send(404);
-      return;
-    }
-
-    request->send(
-        request->beginResponse(LittleFS, FileName, "text/plain")); });
+                              request->send(
+                                  request->beginResponse(
+                                      LittleFS,
+                                      file_name,
+                                      "text/plain")); });
 
   network.AddWebPageHandler("/time", [](AsyncWebServerRequest *request)
                             {
-    StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-    deserializeJson(preferences, LoadPreferences());
+                              StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+                              deserializeJson(preferences, LoadPreferences());
 
-    timeManager.Setup(request->arg("epoch").toInt(), request->arg("dayoftheweek").toInt(), preferences);
-    _log.gotTime = true;
+                              timeManager.Setup(
+                                request->arg("epoch").toInt(), 
+                                request->arg("dayoftheweek").toInt(), 
+                                preferences);
+                              _log.gotTime = true;
 
-    SavePreferences(&preferences);
+                              SavePreferences(&preferences);
 
-    request->send(200); });
+                              request->send(200); });
 
   network.AddWebPageHandler("/brightness", [](AsyncWebServerRequest *request)
                             {
-    int value = request->arg("value").toInt();
-    FastLED.setBrightness(value);
+                              int value = request->arg("value").toInt();
+                              FastLED.setBrightness(value);
 
-    if (request->hasArg("save"))
-    {
-      StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-      deserializeJson(preferences, LoadPreferences());
-      preferences[BRIGHTNESS] = value;
-      SavePreferences(&preferences);
-    }
-    request->send(200); });
+                              if (request->hasArg("save"))
+                              {
+                                StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+                                deserializeJson(preferences, LoadPreferences());
+                                preferences[BRIGHTNESS] = value;
+                                SavePreferences(&preferences);
+                              }
+                              request->send(200); });
 
   network.AddWebPageHandler("/light_switch", [](AsyncWebServerRequest *request)
                             {
-    bool value = request->arg("value") == "true";
-    modeHandler.LightSwitch(value);
+                              bool value = request->arg("value") == "true";
+                              modeHandler.LightSwitch(value);
 
-    if (request->hasArg("save"))
-    {
-      StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
-      deserializeJson(preferences, LoadPreferences());
-      preferences[LIGHT_SWITCH] = value;
-      SavePreferences(&preferences);
-    }
-    request->send(200); });
+                              if (request->hasArg("save"))
+                              {
+                                StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
+                                deserializeJson(preferences, LoadPreferences());
+                                preferences[LIGHT_SWITCH] = value;
+                                SavePreferences(&preferences);
+                              }
+                              request->send(200); });
 
   network.AddWebPageHandler("/fullreset", [](AsyncWebServerRequest *request)
-                            { SaveWifiCredentials("", "");
-                              delay(100);
+                            { 
+                              SaveWifiCredentials("", "");
                               request->send(200);
+                              delay(100);
                               ESP.reset(); });
 
   //====================================================
@@ -396,25 +432,37 @@ void AddServerHandlers()
   // pages
   network.AddWebPageHandler("/en/home", [](AsyncWebServerRequest *request)
                             { request->send(
-                                  request->beginResponse(LittleFS, "web/home/home.html", "text/html")); });
+                                  request->beginResponse(
+                                      LittleFS,
+                                      "web/home/home.html",
+                                      "text/html")); });
   network.AddWebPageHandler("/ru/home", [](AsyncWebServerRequest *request)
                             { request->send(
-                                  request->beginResponse(LittleFS, "web/home/home_ru.html", "text/html")); });
+                                  request->beginResponse(
+                                      LittleFS,
+                                      "web/home/home_ru.html",
+                                      "text/html")); });
 
   //------------------------------------------------------
   network.AddWebPageHandler("/en/schedule", [](AsyncWebServerRequest *request)
                             { request->send(
-                                  request->beginResponse(LittleFS, "web/schedule/schedule.html", "text/html")); });
+                                  request->beginResponse(
+                                      LittleFS,
+                                      "web/schedule/schedule.html",
+                                      "text/html")); });
   network.AddWebPageHandler("/ru/schedule", [](AsyncWebServerRequest *request)
                             { request->send(
-                                  request->beginResponse(LittleFS, "web/schedule/schedule_ru.html", "text/html")); });
+                                  request->beginResponse(
+                                      LittleFS,
+                                      "web/schedule/schedule_ru.html",
+                                      "text/html")); });
 
   network._server.begin();
 }
 
 void ChangeLanguage(const char *_lang)
 {
-  currentLanguage = _lang;
+  strncpy(currentLanguage, _lang, sizeof(currentLanguage));
 
   StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
   deserializeJson(preferences, LoadPreferences());
@@ -424,22 +472,21 @@ void ChangeLanguage(const char *_lang)
   SavePreferences(&preferences);
 }
 
-void minuteSecondTimer()
+void minuteTimer()
 {
+
 #ifdef DEBUG_HEAP
   {
-    char msg[64] = "[ESP] Available ram: ";
+    char msg[64];
 
-    itoa(ESP.getFreeHeap(), strchr(msg, 0), DEC);
-    strcat(msg, " bytes");
+    snprintf(msg, sizeof(msg), "[ESP] Available ram: %i bytes",
+             (int)ESP.getFreeHeap());
     sprintln(msg);
   }
 
 #endif
 
   network.CleanUp();
-
-  network.CheckStatus();
 
   StaticJsonDocument<STATIC_DOCUMENT_MEMORY_SIZE> preferences;
   deserializeJson(preferences, LoadPreferences());
@@ -449,34 +496,40 @@ void minuteSecondTimer()
   SavePreferences(&preferences);
 }
 
-const char *current_stream = "";
+void tenSecondTimer()
+{
+  network.CheckStatus();
+}
+
+char current_stream[64] = "";
 
 void OnWebSocketMessage(const char *data)
 {
-  if (!strcmp(current_stream, ""))
+  if (strcmp(current_stream, "") == 0)
   {
-    if (strcmp(data, "]"))
     {
-      current_stream = "";
-      return;
+      char msg[64];
+
+      snprintf(msg, sizeof(msg), "[Websocket] New stream: \"%s\"", data);
+
+      sprintln(msg);
     }
 
-    if (strcmp(current_stream, BRIGHTNESS))
-      FastLED.setBrightness(atoi(data));
-    else
-      modeHandler.PushArg(current_stream, data);
+    strcpy(current_stream, data);
 
     return;
   }
 
+  if (strcmp(data, "]") == 0)
   {
-    char msg[64] = "[Websocket] Got: \"";
-    strcat(msg, data);
-    strcat(msg, "\" --endln");
-    sprintln(msg);
+    strcpy(current_stream, "");
+    return;
   }
 
-  current_stream = data;
+  if (strcmp(current_stream, BRIGHTNESS) == 0)
+    FastLED.setBrightness(atoi(data));
+  else
+    modeHandler.PushArg(current_stream, data);
 }
 
 void SetupFastLED()
@@ -498,11 +551,9 @@ void ApplyPreferences(const char *data)
   deserializeJson(preferences, data);
 
 #ifdef DEBUG_PREFERENCES
-  msg char[256] = "[ESP] Loaded preferences: \n";
+  msg char[256] = ;
 
-  strcat(msg, data);
-  strcat(msg, "\n");
-  strcat(msg, line);
+  snprintf(msg, sizeof(msg), "[ESP] Loaded preferences: \n%s\n" line, data);
 
   sprintln(msg);
 
@@ -513,7 +564,7 @@ void ApplyPreferences(const char *data)
 
   modeHandler.current_mode_id = preferences["mode"].as<int>();
 
-  currentLanguage = preferences["lang"].as<const char *>();
+  strncpy(currentLanguage, preferences["lang"].as<const char *>(), sizeof(currentLanguage));
 
   _log.SaveLogs = preferences["debug"].as<bool>();
 
@@ -553,10 +604,8 @@ void onTimeEventFired(float, EventType eventType, int value, const char *args)
     modeHandler.ChangeMode(value, args);
 
     {
-      char msg[128] = "";
-      itoa(value, msg, DEC);
-      strcat(msg, ",");
-      strcat(msg, args);
+      char msg[128];
+      snprintf(msg, sizeof(msg), "%i,%s", value, args);
 
       network.SendEvent("mode_changed", msg);
     }

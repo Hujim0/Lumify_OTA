@@ -30,31 +30,34 @@ TimeEvent::TimeEvent(int epoch_time, float _transition, EventType type, int _val
 
 TimeEvent::TimeEvent() {}
 
-const char *TimeEvent::stringify()
+String TimeEvent::stringify()
 {
-    char *result = (char *)malloc(100);
 
-    strcat(result, "TimeEvent at ");
-    strcat(result, TimeManager::FormatTime(epochTime));
-    strcat(result, ", type: ");
+    char msg[256];
+
+    {
+        String time = TimeManager::FormatTime(epochTime);
+        snprintf(msg, sizeof(msg), "TimeEvent at %s, type: ", time.c_str());
+        time[0] = 0;
+    }
+
     if (eventType == EventType::Brightness)
     {
-        strcat(result, "Brightness, value: ");
-        itoa(value, strchr(result, 0), DEC);
+        snprintf(&msg[strlen(msg)],
+                 sizeof(msg) - strlen(msg),
+                 "Brightness, value: %i",
+                 value);
     }
     else
     {
-        strcat(result, "Mode, id: ");
-        itoa(value, strchr(result, 0), DEC);
-        strcat(result, ", args: \"");
-        strcat(result, args);
-        strcat(result, "\"");
+        snprintf(&msg[strlen(msg)],
+                 sizeof(msg) - strlen(msg),
+                 "Mode, id: %i, args: \"%s\"",
+                 value,
+                 args);
     }
 
-    return result;
-
-    // return "TimeEvent at " +
-    //        TimeManager::FormatTime(epochTime) + ", type: " + String(eventType) + ", value: " + String(value) + ", args: \"" + String(args) + "\"";
+    return String(msg);
 }
 
 bool TimeEvent::Equals(int epoch_time, EventType event_type)

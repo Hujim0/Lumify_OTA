@@ -57,7 +57,7 @@ void WaveMode::update_args(const char *data)
 
 void WaveMode::update_arg(const char *arg, const char *value)
 {
-    if (strcmp(arg, SPEED_ARG))
+    if (strcmp(arg, SPEED_ARG) == 0)
     {
         speed = atof(value);
         if (!reversed)
@@ -65,9 +65,9 @@ void WaveMode::update_arg(const char *arg, const char *value)
             speed *= -1.0F;
         }
     }
-    else if (strcmp(arg, INTENSITY_ARG))
+    else if (strcmp(arg, INTENSITY_ARG) == 0)
         intensity = (float)atof(value) * 0.01F;
-    else if (strcmp(arg, COLOR_ARG))
+    else if (strcmp(arg, COLOR_ARG) == 0)
         color = toHex(value);
 }
 

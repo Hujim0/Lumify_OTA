@@ -9,22 +9,19 @@ bool NetworkAP::StartCaptivePortal(const char *ssid)
 
     WiFi.mode(WiFiMode_t::WIFI_AP);
 
-    char url[64] = "http://";
-    strcat(url, WiFi.softAPIP().toString().c_str());
+    char url[64];
+    snprintf(url, sizeof(url), "http://%s", WiFi.softAPIP().toString().c_str());
 
     {
-        char new_ssid[64] = "";
-        strcpy(new_ssid, ssid);
-        strcat(new_ssid, " ");
-        strcat(new_ssid, url);
+        char new_ssid[64];
+        snprintf(new_ssid, sizeof(new_ssid), "%s %s", ssid, url);
+
         WiFi.softAP(new_ssid, "", 1, 0, 16, 100);
     }
 
     {
-        char msg[128] = "";
-        strcpy(msg, LOG_PREFIX);
-        strcat(msg, "AP started! ");
-        strcat(msg, url);
+        char msg[128];
+        snprintf(msg, sizeof(msg), LOG_PREFIX "AP started! %s", url);
 
         sprintln(msg);
     }

@@ -44,7 +44,7 @@ private:
     String buffer;
     uint64_t buffer_size;
 
-    const char *url;
+    char url[128];
 
 public:
     OnNewClientHandler onNewClientHandler = NULL;
@@ -53,7 +53,7 @@ public:
     AsyncWebSocket _webSocket = AsyncWebSocket("/ws");
     AsyncEventSource _events = AsyncEventSource("/events");
 
-    const char *stringPort;
+    char stringPort[10];
 
     uint16_t NetworkPort = DEFAULT_PORT;
 

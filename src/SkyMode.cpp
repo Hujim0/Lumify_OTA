@@ -74,7 +74,7 @@ void SkyMode::update_args(const char *data)
 }
 void SkyMode::update_arg(const char *arg, const char *value)
 {
-    if (strcmp(arg, SPEED_ARG))
+    if (strcmp(arg, SPEED_ARG) == 0)
     {
         speed = atof(value);
     }

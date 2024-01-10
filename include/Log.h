@@ -20,13 +20,13 @@ public:
     bool SaveLogs = true;
     bool gotTime = false;
 
-    int currentFileNumber = 0;
+    char currentFilePath[64];
 
     File currentFile;
 
     // void Print(const char *);
     void Println(const char *);
-    const char *GetFileName(int &id);
+    String GetFileName(int id);
 
     void Begin();
 

@@ -18,7 +18,7 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek, StaticJsonDoc
 
 void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
 {
-    if (isSetuped)
+    if (isReady)
     {
         MillisOffset = (unsigned long)(epoch_time_seconds * 1000) - millis();
         return;
@@ -34,24 +34,23 @@ void TimeManager::Setup(int epoch_time_seconds, int _dayOfTheWeek)
     minutes = (epoch_time_seconds % 3600) / 60;
     seconds = epoch_time_seconds % 60;
 
-    isSetuped = true;
+    isReady = true;
 
-    char msg[50] = "";
+    {
+        char msg[64];
+        String time = GetCurrentFormattedTime();
+        snprintf(msg, sizeof(msg), LOG_PREFIX "Got time! %s, day of the week: %i",
+                 time,
+                 dayOfTheWeek);
+        time[0] = 0;
 
-    strcat(msg, LOG_PREFIX);
-    strcat(msg, "Got time!");
-    strcat(msg, GetCurrentFormattedTime());
-    strcat(msg, ", day of the week: ");
-    itoa(dayOfTheWeek, msg + strlen(msg), DEC);
-
-    sprintln(msg);
-
-    // sprintln(LOG_PREFIX + "Got time! " + GetCurrentFormattedTime() + ", day of the week: " + String(dayOfTheWeek));
+        sprintln(msg);
+    }
 }
 
 void TimeManager::Update()
 {
-    if (!isSetuped)
+    if (!isReady)
         return;
 
     epoch_time_day_seconds = (int)(((MillisOffset + millis()) / 1000UL) % 86400UL);
@@ -92,22 +91,23 @@ void TimeManager::UpdateMinutes()
         if (!result)
             continue;
 
-        char msg[100] = "";
+        {
+            char msg[256];
 
-        const char *event_stringified = timeEvents[i].stringify();
+            String event_stringified = timeEvents[i].stringify();
 
-        strcat(msg, LOG_PREFIX);
-        strcat(msg, "TimeEvent executed: ");
-        strcat(msg, event_stringified);
+            snprintf(msg, sizeof(msg), LOG_PREFIX "TimeEvent executed: %s",
+                     event_stringified.c_str());
 
-        free((void *)event_stringified);
+            event_stringified[0] = 0;
 
-        sprintln(msg);
+            sprintln(msg);
+        }
     }
 
-    if (timer != NULL)
+    if (OneMinuteTimer != NULL)
     {
-        timer();
+        OneMinuteTimer();
     }
 }
 
@@ -120,54 +120,43 @@ void TimeManager::UpdateSeconds()
 
     seconds = timeSecs;
 
+    if (seconds % 5 == 0)
+    {
+        if (TenSecondsTimer != NULL)
+            TenSecondsTimer();
+    }
+
     UpdateMinutes();
 }
 
-const char *TimeManager::GetCurrentFormattedTime()
+String TimeManager::GetCurrentFormattedTime()
 {
-    if (!isSetuped)
-        return "unknown";
+    String res((char *)0);
+    res.reserve(8);
+    {
+        char time[9];
+        snprintf(time, sizeof(time), "%.2i:%.2i:%.2i", hours, minutes, seconds);
 
-    char *res = (char *)malloc(9);
-
-    if (hours < 10)
-        strcat(res, "0");
-    itoa(hours, strchr(res, 0), DEC);
-    strcat(res, ":");
-    // time += hours + ":";
-    if (minutes < 10)
-        strcat(res, "0");
-    itoa(minutes, strchr(res, 0), DEC);
-    strcat(res, ":");
-    if (seconds < 10)
-        strcat(res, "0");
-    itoa(seconds, strchr(res, 0), DEC);
-    strcat(res, ":");
+        res = time;
+    }
 
     return res;
 }
 
-const char *TimeManager::FormatTime(int epoch)
+String TimeManager::FormatTime(int epoch)
 {
     int _hours = epoch / 3600;
     int _minutes = (epoch % 3600) / 60;
     int _seconds = epoch % 60;
 
-    char *res = (char *)malloc(9);
+    String res((char *)0);
+    res.reserve(8);
+    {
+        char time[9];
+        snprintf(time, sizeof(time), "%.2i:%.2i:%.2i", _hours, _minutes, _seconds);
 
-    if (_hours < 10)
-        strcat(res, "0");
-    itoa(_hours, strchr(res, 0), DEC);
-    strcat(res, ":");
-    // time += hours + ":";
-    if (_minutes < 10)
-        strcat(res, "0");
-    itoa(_minutes, strchr(res, 0), DEC);
-    strcat(res, ":");
-    if (_seconds < 10)
-        strcat(res, "0");
-    itoa(_seconds, strchr(res, 0), DEC);
-    strcat(res, ":");
+        res = time;
+    }
 
     return res;
 }
@@ -208,11 +197,6 @@ void TimeManager::AddTimeEventsFromJson(JsonVariant json)
 
     TimeEvent events[count];
 
-    char msg_prefix[20] = "";
-
-    strcat(msg_prefix, LOG_PREFIX);
-    strcat(msg_prefix, "Added ");
-
     for (size_t i = 0; i < count; i++)
     {
         events[i] = TimeEvent(
@@ -222,14 +206,15 @@ void TimeManager::AddTimeEventsFromJson(JsonVariant json)
             time_events_array_json[i]["value"].as<int>(),
             time_events_array_json[i]["args"].as<const char *>());
 
-        char msg[100];
+        char msg[256];
 
-        strcpy(msg, msg_prefix);
-        strcat(msg, events[i].stringify());
+        {
+            String event_stringified = events[i].stringify();
+            snprintf(msg, sizeof(msg), LOG_PREFIX "Added %s", event_stringified.c_str());
+            event_stringified[0] = 0;
+        }
 
         sprintln(msg);
-
-        // sprintln(LOG_PREFIX + "Added " + events[i].stringify());
     }
 
     time_events_array_json.clear();
