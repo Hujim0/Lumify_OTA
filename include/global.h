@@ -5,6 +5,4 @@
 #include <Arduino.h>
 #define sprintln Log::Instance->Println
 
-#define line (const char *)"------------------------------------------------------------------"
-
-#endif
+const char *line = "------------------------------------------------------------------";

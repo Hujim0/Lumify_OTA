@@ -1,4 +1,5 @@
-#pragma once
+#ifndef FILESYSTEMMAHAGER_H
+#define FILESYSTEMMAHAGER_H
 
 #define WIFI_SETTINGS_PATH "/wifi_settings.txt"
 #define PREFERENCES_PATH "/preferences.json"
@@ -25,3 +26,5 @@ bool FileExists(const char *path);
 // void Save
 
 const char *GetElementsFilePath(const char *lang, const char *id);
+
+#endif

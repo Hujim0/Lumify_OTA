@@ -1,7 +1,10 @@
-#pragma once
+#ifndef NETWORKMANAGER_H
+#define NETWORKMANAGER_H
 
 #define DNS_SERVER_URL "lumify"
 #include <ESP8266mDNS.h>
+
+#pragma once
 
 #include <AsyncJson.h>
 #include <ArduinoJson.h>
@@ -84,3 +87,5 @@ public:
 
     NetworkManager();
 };
+
+#endif
