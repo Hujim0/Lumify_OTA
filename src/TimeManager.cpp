@@ -3,7 +3,7 @@
 #include <TimeManager.h>
 #include <TimeEvent.h>
 
-const char *LOG_PREFIX = "[TimeManager] ";
+#define LOG_PREFIX "[TimeManager] "
 
 TimeManager *TimeManager::Instance = 0;
 
@@ -94,9 +94,13 @@ void TimeManager::UpdateMinutes()
 
         char msg[100] = "";
 
+        const char *event_stringified = timeEvents[i].stringify();
+
         strcat(msg, LOG_PREFIX);
         strcat(msg, "TimeEvent executed: ");
-        strcat(msg, timeEvents[i].stringify());
+        strcat(msg, event_stringified);
+
+        free((void *)event_stringified);
 
         sprintln(msg);
     }
@@ -124,20 +128,20 @@ const char *TimeManager::GetCurrentFormattedTime()
     if (!isSetuped)
         return "unknown";
 
-    char res[10] = "";
+    char *res = (char *)malloc(9);
 
     if (hours < 10)
         strcat(res, "0");
-    itoa(hours, strchr(res, NULL), DEC);
+    itoa(hours, strchr(res, 0), DEC);
     strcat(res, ":");
     // time += hours + ":";
     if (minutes < 10)
         strcat(res, "0");
-    itoa(minutes, strchr(res, NULL), DEC);
+    itoa(minutes, strchr(res, 0), DEC);
     strcat(res, ":");
     if (seconds < 10)
         strcat(res, "0");
-    itoa(seconds, strchr(res, NULL), DEC);
+    itoa(seconds, strchr(res, 0), DEC);
     strcat(res, ":");
 
     return res;
@@ -149,20 +153,20 @@ const char *TimeManager::FormatTime(int epoch)
     int _minutes = (epoch % 3600) / 60;
     int _seconds = epoch % 60;
 
-    char res[10] = "";
+    char *res = (char *)malloc(9);
 
     if (_hours < 10)
         strcat(res, "0");
-    itoa(_hours, strchr(res, NULL), DEC);
+    itoa(_hours, strchr(res, 0), DEC);
     strcat(res, ":");
     // time += hours + ":";
     if (_minutes < 10)
         strcat(res, "0");
-    itoa(_minutes, strchr(res, NULL), DEC);
+    itoa(_minutes, strchr(res, 0), DEC);
     strcat(res, ":");
     if (_seconds < 10)
         strcat(res, "0");
-    itoa(_seconds, strchr(res, NULL), DEC);
+    itoa(_seconds, strchr(res, 0), DEC);
     strcat(res, ":");
 
     return res;

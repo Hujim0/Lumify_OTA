@@ -8,12 +8,16 @@ void Log::Println(const char *toPrint)
 {
     char msg[128] = "";
 
-    if (gotTime)
-    {
-        strcat(msg, TimeManager::Instance->GetCurrentFormattedTime());
-        strcat(msg, " ");
-    }
-    strcat(msg, toPrint);
+    // if (gotTime)
+    // {
+    //     // strcpy(msg, TimeManager::Instance->GetCurrentFormattedTime());
+    //     // strcat(msg, " ");
+    //     strcat(msg, toPrint);
+    // }
+    // else
+    // {
+    strcpy(msg, toPrint);
+    // }
 
 #ifdef DEBUG_SERIAL
     Serial.println(msg);
@@ -39,12 +43,18 @@ void Log::Begin()
     if (!SaveLogs)
         return;
 
-    while (LittleFS.exists(GetFileName(currentFileNumber)))
+    const char *path = GetFileName(currentFileNumber);
+
+    while (LittleFS.exists(path))
+    {
         currentFileNumber += 1;
+        free((void *)path);
+        path = GetFileName(currentFileNumber);
+    }
 
-    char *str = "[DEBUG] Log File: ";
+    char str[128] = "[DEBUG] Log File: ";
 
-    strcat(str, GetFileName(currentFileNumber));
+    strcat(str, path);
     strcat(str, "\n");
     strcat(str, "[DEBUG] Reload cause: ");
     strcat(str, ESP.getResetReason().c_str());
@@ -66,7 +76,7 @@ Log::Log()
 
 const char *Log::GetFileName(int &id)
 {
-    char result[32] = "";
+    char *result = (char *)malloc(32);
 
     strcat(result, "/logs/log");
     itoa(id, result + strlen(result), DEC);
